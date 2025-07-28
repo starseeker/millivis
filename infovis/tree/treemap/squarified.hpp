@@ -80,11 +80,11 @@ template <class Tree,
 struct treemap_squarified
   : public treemap<Tree,Box,WeightMap,Drawer,Filter>
 {
-  typedef treemap<Tree,Box,WeightMap,Drawer,Filter> super;
-  typedef typename super::box_type box_type;
-  typedef typename super::dist_type dist_type;
-  typedef typename super::children_iterator children_iterator;
-  typedef typename super::node_descriptor node_descriptor;
+  using super = treemap<Tree,Box,WeightMap,Drawer,Filter>;
+  using box_type = typename super::box_type;
+  using dist_type = typename super::dist_type;
+  using children_iterator = typename super::children_iterator;
+  using node_descriptor = typename super::node_descriptor;
 
   treemap_squarified(const Tree& tree,
 		     WeightMap wm,

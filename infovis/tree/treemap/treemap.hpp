@@ -36,7 +36,17 @@
 namespace infovis {
 
 /**
- * Base treemap class.
+ * Base treemap class providing common functionality
+ * 
+ * This template provides the foundation for all treemap algorithm implementations.
+ * It manages the tree data structure, weight mapping, drawing interface, and filtering.
+ * 
+ * Template parameters:
+ * - Tree: The tree data structure to visualize
+ * - Box: Bounding box type for spatial layout  
+ * - WeightMap: Property map providing node weights/sizes
+ * - Drawer: Drawing/rendering interface (default: null_drawer)
+ * - Filter: Node filtering policy (default: filter_none)
  */
 template <class Tree,
 	  class Box,
@@ -46,11 +56,12 @@ template <class Tree,
 >
 struct treemap
 {
-  typedef Box box_type;
-  typedef typename box_traits<Box>::coord_type coord_type;
-  typedef typename box_traits<Box>::dist_type dist_type;
-  typedef typename tree_traits<Tree>::children_iterator children_iterator;
-  typedef typename tree_traits<Tree>::node_descriptor node_descriptor;
+  // C++17 modernization: using declarations instead of typedef
+  using box_type = Box;
+  using coord_type = typename box_traits<Box>::coord_type;
+  using dist_type = typename box_traits<Box>::dist_type;
+  using children_iterator = typename tree_traits<Tree>::children_iterator;
+  using node_descriptor = typename tree_traits<Tree>::node_descriptor;
     
   treemap(const Tree& tree,
 	  WeightMap wm,

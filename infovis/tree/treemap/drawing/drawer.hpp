@@ -32,37 +32,27 @@
 namespace infovis {
 
 /**
- * Minimal drawer.
+ * Minimal null drawer implementation for treemap algorithms
+ * 
+ * This is a no-op drawer that provides the minimal interface required by treemap
+ * algorithms. Use this as a base for implementing custom drawing behavior or when
+ * you only need the layout computation without actual rendering.
  */
 template <class Tree, class Box>
 struct null_drawer {
+  using node_descriptor = typename tree_traits<Tree>::node_descriptor;
 
-  void start() { }
-  void finish() { }
+  void start() noexcept { }
+  void finish() noexcept { }
 
-  void begin_strip(const Box& b,
-		   typename tree_traits<Tree>::node_descriptor n,
-		   unsigned depth,
-		   direction dir) { }
-  void end_strip(const Box& b,
-		 typename tree_traits<Tree>::node_descriptor n,
-		 unsigned depth,
-		 direction dir) { }
-  bool begin_box(const Box& b,
-		 typename tree_traits<Tree>::node_descriptor n,
-		 unsigned depth) { return true; }
-  void draw_box(const Box& b,
-		typename tree_traits<Tree>::node_descriptor n,
-		unsigned depth) { }
-  void draw_border(Box& b, 
-		   typename tree_traits<Tree>::node_descriptor n,
-		   unsigned depth) { }
-  void remove_border(Box& b, 
-		     typename tree_traits<Tree>::node_descriptor n,
-		     unsigned depth) { }
-  void end_box(const Box& b, 
-	       typename tree_traits<Tree>::node_descriptor n,
-	       unsigned depth) { }
+  void begin_strip(const Box& b, node_descriptor n, unsigned depth, direction dir) noexcept { }
+  void end_strip(const Box& b, node_descriptor n, unsigned depth, direction dir) noexcept { }
+  
+  bool begin_box(const Box& b, node_descriptor n, unsigned depth) noexcept { return true; }
+  void draw_box(const Box& b, node_descriptor n, unsigned depth) noexcept { }
+  void draw_border(Box& b, node_descriptor n, unsigned depth) noexcept { }
+  void remove_border(Box& b, node_descriptor n, unsigned depth) noexcept { }
+  void end_box(const Box& b, node_descriptor n, unsigned depth) noexcept { }
 };
 
 } // namespace infovis

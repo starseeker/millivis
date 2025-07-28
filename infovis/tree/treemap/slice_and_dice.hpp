@@ -62,11 +62,11 @@ template <class Tree,
 struct treemap_slice_and_dice :
     public treemap<Tree,Box,WeightMap,Drawer,Filter>
 {
-  typedef treemap<Tree,Box,WeightMap,Drawer,Filter> super;
-  typedef typename super::coord_type coord_type;
-  typedef typename super::dist_type dist_type;
-  typedef typename super::children_iterator children_iterator;
-  typedef typename super::node_descriptor node_descriptor;
+  using super = treemap<Tree,Box,WeightMap,Drawer,Filter>;
+  using coord_type = typename super::coord_type;
+  using dist_type = typename super::dist_type;
+  using children_iterator = typename super::children_iterator;
+  using node_descriptor = typename super::node_descriptor;
 
   treemap_slice_and_dice(const Tree& tree,
 			 WeightMap wm,

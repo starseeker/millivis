@@ -43,11 +43,11 @@ template <class Tree,
 struct treemap_squarified_anim :
     public treemap_squarified<Tree,Box,WeightMap,Drawer,Orient,Filter>
 {
-  typedef treemap_squarified<Tree,Box,WeightMap,Drawer,Orient,Filter> super;
-  typedef typename box_traits<Box>::coord_type coord_type;
-  typedef typename box_traits<Box>::dist_type dist_type;
-  typedef typename tree_traits<Tree>::children_iterator children_iterator;
-  typedef typename tree_traits<Tree>::node_descriptor node_descriptor;
+  using super = treemap_squarified<Tree,Box,WeightMap,Drawer,Orient,Filter>;
+  using coord_type = typename box_traits<Box>::coord_type;
+  using dist_type = typename box_traits<Box>::dist_type;
+  using children_iterator = typename tree_traits<Tree>::children_iterator;
+  using node_descriptor = typename tree_traits<Tree>::node_descriptor;
 
   treemap_squarified_anim(const Tree& tree,
 			  WeightMap wm,
@@ -62,44 +62,44 @@ struct treemap_squarified_anim :
   unsigned visit_anim(const Box& box, const Box& box2,
 		      typename tree_traits<Tree>::node_descriptor n,
 		      unsigned depth = 0) {
-    if (! drawer_.begin_box(box2,n, depth))
+    if (! this->drawer_.begin_box(box2,n, depth))
       return 0;
     Box b(box);
     Box b2(box2);
-    drawer_.draw_border(b2, n,  depth);
+    this->drawer_.draw_border(b2, n,  depth);
     unsigned ret = 1;
-    if (degree(n,tree_) == 0) {
-      drawer_.draw_box(b2, n,  depth);
+    if (degree(n,this->tree_) == 0) {
+      this->drawer_.draw_box(b2, n,  depth);
     }
     else {
-      drawer_.remove_border(b, n,  depth);
-      const float tw = infovis::get(weight_,n);
+      this->drawer_.remove_border(b, n,  depth);
+      const float tw = infovis::get(this->weight_,n);
       const float tw2 = infovis::get(weight2_,n);
 
-      children_iterator i, end;
-      boost::tie(i,end) = children(n, tree_);
+      // C++17 structured bindings instead of boost::tie
+      auto [i, end] = children(n, this->tree_);
       float scale = width(b) * height(b) / tw;
       float scale2 = width(b2) * height(b2) / tw2;
       if (scale == 0) {
 	// nothing
       }
       else while (i != end) {
-	if (filter_(*i)) {
+	if (this->filter_(*i)) {
 	  continue;
 	}
-	if (orient_(b, n, depth)) {
+	if (this->orient_(b, n, depth)) {
 	  dist_type w = height(b);
 	  dist_type w2 = height(b2);
 	  float y = ymin(b);
 	  float y2 = ymin(b2);
 	  float width;
 
-	  children_iterator e = squarify(i, end, w, scale, width);
+	  auto e = this->squarify(i, end, w, scale, width);
 	  float width2 = recompute_width(i, e, w2, scale2);
 	  for (; i != e; i++) {
-	    node_descriptor child = *i;
-	    float nw = infovis::get(weight_,child) * scale / width;
-	    float nw2 = infovis::get(weight2_,child) * scale2 / width2;
+	    const auto child = *i;
+	    const float nw = infovis::get(this->weight_,child) * scale / width;
+	    const float nw2 = infovis::get(weight2_,child) * scale2 / width2;
 	    ret += visit_anim(Box(xmin(b),y,xmin(b)+width,y+nw),
 			      Box(xmin(b2),y2,xmin(b2)+width2,y2+nw2),
 			      child, depth+1);
@@ -115,12 +115,12 @@ struct treemap_squarified_anim :
 	  float x = xmin(b);
 	  float x2 = xmin(b2);
 	  float width;
-	  children_iterator e = squarify(i, end, w, scale, width);
+	  auto e = this->squarify(i, end, w, scale, width);
 	  float width2 = recompute_width(i, e, w2, scale2);
 	  for (; i != e; i++) {
-	    node_descriptor child = *i;
-	    float nw = infovis::get(weight_,child) * scale / width;
-	    float nw2 = infovis::get(weight2_,child) * scale2 / width2;
+	    const auto child = *i;
+	    const float nw = infovis::get(this->weight_,child) * scale / width;
+	    const float nw2 = infovis::get(weight2_,child) * scale2 / width2;
 	    ret += visit_anim(Box(x, ymin(b), x+nw, ymin(b)+width),
 			      Box(x2, ymin(b2), x2+nw2, ymin(b2)+width2),
 			      child, depth+1);
@@ -132,7 +132,7 @@ struct treemap_squarified_anim :
 	}
       }
     }
-    drawer_.end_box(box2,n,depth);
+    this->drawer_.end_box(box2,n,depth);
     return ret;
   }
   float recompute_width(typename tree_traits<Tree>::children_iterator beg,
@@ -142,7 +142,7 @@ struct treemap_squarified_anim :
   {
     float s = 0;
     while (beg != end) {
-      if (! filter_(*beg))
+      if (! this->filter_(*beg))
 	s += infovis::get(weight2_,*beg++) * scale;
     }
     return s / length;
