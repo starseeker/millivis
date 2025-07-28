@@ -23,7 +23,8 @@
  * SOFTWARE.
  */
 #include <infovis/tree/property_tree.hpp>
-#include <boost/directory.h>
+// TODO: Replaced boost/directory.h with std::filesystem - C++17 modernization
+#include <filesystem>
 #include <sys/stat.h>
 
 namespace infovis {
@@ -42,30 +43,37 @@ struct dir_property_tree_builder {
   Tree::prop_id ctime_;
     
   unsigned build(node_descriptor parent, const std::string& dirname) {
-    using namespace boost::filesystem;
+    // TODO: Replaced boost::filesystem with std::filesystem - C++17 modernization
     unsigned ret = 0;
 
-    for (dir_it it(dirname); it != dir_it(); ++it) {
-      if ((*it)[0] == '.')
+    if (!std::filesystem::exists(dirname)) return ret;
+    
+    for (const auto& entry : std::filesystem::directory_iterator(dirname)) {
+      std::string filename = entry.path().filename().string();
+      if (filename[0] == '.')
 	continue;
       ret++;
       node_descriptor n = add_node(parent, tree_);
-      tree_.get_prop_numeric(size_)[n] = boost::filesystem::get<size>(it);
-      tree_.get_prop_numeric(type_)[n] = boost::filesystem::get<is_directory>(it) ? 1 : 0;
+      
+      std::error_code ec;
+      auto file_size = std::filesystem::file_size(entry.path(), ec);
+      tree_.get_prop_numeric(size_)[n] = ec ? 0 : static_cast<long>(file_size);
+      
+      tree_.get_prop_numeric(type_)[n] = entry.is_directory() ? 1 : 0;
       struct stat s;
-      stat((dirname+(*it)).c_str(), &s);
+      stat(entry.path().c_str(), &s);
 
       tree_.get_prop_numeric(mtime_)[n] = s.st_mtime;
       tree_.get_prop_numeric(ctime_)[n] = s.st_ctime;
       tree_.get_prop_numeric(atime_)[n] = s.st_atime;
 
-      if (boost::filesystem::get<is_directory>(it)) {
-	std::string name = *it + "/";
+      if (entry.is_directory()) {
+	std::string name = filename + "/";
 	tree_.get_prop_string(name_)[n] = name;
-	ret += build(n, dirname+name);
+	ret += build(n, entry.path().string() + "/");
       }
       else
-	tree_.get_prop_string(name_)[n] = *it;
+	tree_.get_prop_string(name_)[n] = filename;
     }
     return ret;
   }

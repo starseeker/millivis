@@ -29,12 +29,14 @@
 #include <map>
 #include <string>
 #include <cstring>
+#include <strings.h> // TODO: Added for strncasecmp - C++17 modernization
 using std::string;
 
 struct string_nocase_less {
   bool operator () (const std::string& s1, const std::string& s2) const {
     int min_sz = s1.size() < s2.size() ? s1.size() : s2.size();
-    int ret = strnicmp(s1.c_str(), s2.c_str(), min_sz);
+    // TODO: Replaced strnicmp with strncasecmp for Unix compatibility - C++17 modernization
+    int ret = strncasecmp(s1.c_str(), s2.c_str(), min_sz);
     if (ret < 0) return true;
     if (ret > 0) return false;
     return s1.size() < s2.size();
@@ -45,7 +47,8 @@ struct string_nocase_eq {
   bool operator() (const std::string& s1, const std::string& s2) const {
     if (s1.size() != s2.size())
       return false;
-    return strnicmp(s1.c_str(), s2.c_str(), s1.size()) == 0;
+    // TODO: Replaced strnicmp with strncasecmp for Unix compatibility - C++17 modernization
+    return strncasecmp(s1.c_str(), s2.c_str(), s1.size()) == 0;
   }
 };
 

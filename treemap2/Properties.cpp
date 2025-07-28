@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include <Properties.hpp>
+#include "Properties.hpp"
 #include <infovis/drawing/Font.hpp>
 #include <infovis/drawing/color_io.hpp>
 #include <cstdlib>

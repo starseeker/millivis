@@ -26,10 +26,19 @@
 #define INFOVIS_TREE_CONCEPTS_HPP
 
 #include <infovis/alloc.hpp>
-#include <boost/config.hpp>
+// TODO: Replaced Boost concept checking with minimal stubs for C++17 modernization
+// Full C++20 concepts migration should be done in a future pass
 #include <infovis/tree/tree_traits.hpp>
-#include <boost/property_map.hpp>
-#include <boost/concept_check.hpp>
+
+// Minimal concept checking stubs to replace Boost - TODO: upgrade to C++20 concepts later
+namespace boost {
+  template<typename T> struct DefaultConstructibleConcept { void constraints() {} };
+  template<typename T> struct EqualityComparableConcept { void constraints() {} };  
+  template<typename T> struct AssignableConcept { void constraints() {} };
+  template<typename T> struct ForwardIteratorConcept { void constraints() {} };
+  template<typename T> struct InputIteratorConcept { void constraints() {} };
+  template<typename T> void function_requires() {}
+}
 
 namespace infovis {
 

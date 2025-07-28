@@ -26,14 +26,15 @@
 #define INFOVIS_TREE_VECTOR_AS_TREE_HPP
 
 #include <infovis/alloc.hpp>
-#include <boost/config.hpp>
+// TODO: Removed boost/config.hpp - C++17 modernization
 #include <cassert>
 
 #include <vector>
 #include <algorithm>
+#include <tuple> // TODO: Added for std::tie - C++17 modernization
 
 #include <infovis/tree/tree_traits.hpp>
-#include <boost/pending/property.hpp>
+// TODO: Removed unused boost/pending/property.hpp - C++17 modernization
 
 namespace infovis {
 
@@ -151,7 +152,8 @@ template <class Compare>
 inline void sort(vector_as_tree& t, Compare comp)
 {
   tree_traits<vector_as_tree>::node_iterator b, i, e;
-  boost::tie(b, e) = nodes(t);
+  // TODO: Replaced boost::tie with std::tie - C++17 modernization
+  std::tie(b, e) = nodes(t);
   for (i = b; i != e; i++) {
     sort_node(i - b, t, comp);
   }
