@@ -78,20 +78,19 @@ BarGraph::computeDistribution(const FloatColumn& values,
 {
   float step = (max_val - min_val + 1) / bars_.size();
   float gap = bars_.size() / (max_val - min_val + 1);
-  FloatColumn::const_iterator i;
 
   reset(0);
 
-  for (i = values.begin(); i != values.end(); i++) {
-    if (*i < min_val || *i > max_val)
+  for (const auto& value : values) {
+    if (value < min_val || value > max_val)
       continue;
-    int index = int((*i - min_val) / step);
+    int index = int((value - min_val) / step);
     for (int j = index; j <= int(index + gap); j++)
       bars_[j]++;
   }
   max_ = min_ = bars_[0];
-  for (i = bars_.begin()+1; i != bars_.end(); i++) {
-    float v = *i;
+  for (auto it = bars_.begin() + 1; it != bars_.end(); ++it) {
+    const float v = *it;
     if (v < min_)
       min_ = v;
     else if (v > max_)
@@ -107,8 +106,8 @@ BarGraph::updateMinMax()
     return;
 
   max_ = min_ = bars_[0];
-  for (List::const_iterator i = bars_.begin()+1; i != bars_.end(); i++) {
-    float v = *i;
+  for (auto it = bars_.begin() + 1; it != bars_.end(); ++it) {
+    const float v = *it;
     if (v < min_)
       min_ = v;
     else if (v > max_)
@@ -140,9 +139,9 @@ BarGraph::render(const Box& box, direction dir) const
   glBegin(GL_QUAD_STRIP);
   glVertex2f(0, 0);
   glVertex2f(1, bars_[1]-min_);
-  for (int i = 0; i < bars_.size(); i++) {
-    glVertex2f(i, 0);
-    glVertex2f(i, bars_[i]-min_);
+  for (size_t i = 0; i < bars_.size(); i++) {
+    glVertex2f(static_cast<float>(i), 0);
+    glVertex2f(static_cast<float>(i), bars_[i]-min_);
   }
   glEnd();
   glPopMatrix();

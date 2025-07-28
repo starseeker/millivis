@@ -84,7 +84,7 @@ public:
   void load(const string& filename);
   void save(const string& filename) const;
 protected:
-  typedef std::map<string,int, string_nocase_less> Map;
+  using Map = std::map<string, int, string_nocase_less>;
   Map extmap;
 };
 

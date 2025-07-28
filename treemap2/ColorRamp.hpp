@@ -30,7 +30,7 @@
 
 namespace infovis {
 
-typedef std::vector<Color> ColorRamp;
+using ColorRamp = std::vector<Color>;
 
 enum Ramp {
 #if 1

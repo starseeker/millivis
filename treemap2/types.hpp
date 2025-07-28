@@ -32,11 +32,11 @@
 
 namespace infovis {
 
-//typedef tree Tree;
-typedef ObservableTree Tree;
+//using Tree = tree;
+using Tree = ObservableTree;
 
-typedef FloatColumn WeightMap;
-typedef UnsignedColumn FilterColumn;
+using WeightMap = FloatColumn;
+using FilterColumn = UnsignedColumn;
 
 inline unsigned
 node_depth(unsigned n, const Tree& t)
@@ -51,9 +51,9 @@ node_depth(unsigned n, const Tree& t)
   return depth;
 }
 
-typedef tree_traits<Tree>::node_descriptor node_descriptor;
-typedef Lite::Path Path;
-typedef std::vector<Box> PathBoxes;
+using node_descriptor = tree_traits<Tree>::node_descriptor;
+using Path = Lite::Path;
+using PathBoxes = std::vector<Box>;
 
 inline string
 subprop(const string& sub, const string& name)

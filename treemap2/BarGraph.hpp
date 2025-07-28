@@ -35,7 +35,7 @@ namespace infovis {
 class BarGraph
 {
 public:
-  typedef std::vector<float, gc_alloc<float, true> > List;
+  using List = std::vector<float, gc_alloc<float, true>>;
   BarGraph(unsigned bars);
 
   virtual void render(const Box& box, direction dir = left_to_right) const;

@@ -298,7 +298,7 @@ compute_file_types(Tree& t)
   FileType ft;
   ft.load("file_types.txt");
   column * c = t.find_column("name");
-  if (c == 0)
+  if (c == nullptr)
     return false;
 
   StringColumn& name = *StringColumn::cast(c);
@@ -374,7 +374,7 @@ add_metadata(Tree& t)
     if (col->get_name()[0] == '$')
       continue;			// don't look at internal columns
     FloatColumn * flt = FloatColumn::cast(col);
-    if (flt == 0)
+    if (flt == nullptr)
       continue;			// don't worry about string columns for now
     
   }
@@ -390,7 +390,7 @@ struct loader {
   { }
 
   void operator()() {
-    if (toload == 0) {
+    if (toload == nullptr) {
       toload = ".";
       std::cout << "Loading current directory\n";
       dir_tree(".", t);
@@ -531,17 +531,16 @@ int main(int argc, char * argv[])
       break;
     }
   }
-  if (weight == 0) {
-    for (Tree::names_iterator n = t.begin_names();
-	 n != t.end_names(); n++) {
+  if (weight == nullptr) {
+    for (auto n = t.begin_names(); n != t.end_names(); ++n) {
       prop = *n;
-      FloatColumn * c = FloatColumn::cast(t.find_column(prop));
-      if (c != 0) {
-	  weight = c;
-	  break;
+      FloatColumn* c = FloatColumn::cast(t.find_column(prop));
+      if (c != nullptr) {
+        weight = c;
+        break;
       }
     }
-    if (weight == 0) {
+    if (weight == nullptr) {
       std::cerr << "Cannot find a weight column\n";
       return 1;
     }
