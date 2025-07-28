@@ -1,0 +1,30 @@
+set(TREEMAP2_SOURCES
+    FileType.cpp
+    Properties.cpp
+    ControlsTab.cpp
+    LitePath.cpp
+    LiteTreemap.cpp
+    # LiteScatterPlot.cpp
+    LayoutVisu.cpp
+    LayoutVisuSQ.cpp
+    LayoutVisuSD.cpp
+    LayoutVisuSP.cpp
+    LiteSpeed.cpp
+    treemap2.cpp
+    # nv_3d_drawer.cpp
+    FastDrawer.cpp
+    FastPicker.cpp
+    ColorRamp.cpp
+    Recorder.cpp
+    BarGraph.cpp
+    LiteRangeSliderGraph.cpp
+    AnimateTree.cpp
+    # DynaQueries.cpp
+    LabelTreemap.cpp
+)
+
+add_executable(treemap2 ${TREEMAP2_SOURCES})
+
+# Assuming liblite and libtree are built elsewhere in the project
+target_link_libraries(treemap2 PRIVATE liblite libtree ${MILLIONVIS_LIBS})
+target_include_directories(treemap2 PRIVATE ${CMAKE_SOURCE_DIR})

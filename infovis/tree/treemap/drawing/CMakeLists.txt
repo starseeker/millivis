@@ -1,0 +1,7 @@
+add_executable(test_gl_drawer test_gl_drawer.cpp)
+# add_executable(test_gl_cs_drawer test_gl_cs_drawer.cpp)
+add_executable(test_gl_pick test_gl_pick.cpp)
+add_executable(test_lite_drawer test_lite_drawer.cpp)
+add_executable(test_lite_drawer2 test_lite_drawer2.cpp)
+add_executable(test_lite_drawer3 test_lite_drawer3.cpp)
+# add_executable(test_3d_drawer test_3d_drawer.cpp)
