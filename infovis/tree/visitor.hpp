@@ -28,6 +28,7 @@
 #include <infovis/alloc.hpp>
 #include <infovis/tree/tree_traits.hpp>
 #include <infovis/tree/tree_concepts.hpp>
+#include <tuple> // TODO: Added for std::tie - C++17 modernization
 
 namespace infovis {
 
@@ -47,7 +48,8 @@ void traverse_tree(typename tree_traits<Tree>::node_descriptor v,
   typedef typename tree_traits<Tree>::children_iterator children_iterator;
   children_iterator i, end;
   std::pair<children_iterator,children_iterator> p = children(v,t);
-  boost::tie(i, end) = children(v, t);
+  // TODO: Replaced boost::tie with std::tie - C++17 modernization  
+  std::tie(i, end) = children(v, t);
   if (i != end) {
     traverse_tree(*i++, t, visitor);
     visitor.inorder(v);

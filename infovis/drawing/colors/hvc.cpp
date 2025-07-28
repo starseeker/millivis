@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include <infovis\drawing\colors\hvc.hpp>
+#include <infovis/drawing/colors/hvc.hpp>
 #include <stdexcept>
 #include <cassert>
 #include <cmath>

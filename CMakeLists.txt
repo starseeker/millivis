@@ -1,9 +1,19 @@
 cmake_minimum_required(VERSION 3.12)
+
+# Set modern CMake policies
+if(POLICY CMP0074)
+  cmake_policy(SET CMP0074 NEW)
+endif()
+if(POLICY CMP0077)
+  cmake_policy(SET CMP0077 NEW)
+endif()
+
 project(millionvis VERSION 0.2)
 
-# Set C++ standard
-set(CMAKE_CXX_STANDARD 14)
+# Set C++ standard to C++17 for modernization
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
@@ -24,9 +34,10 @@ find_package(OpenGL REQUIRED)
 find_package(GLUT REQUIRED)
 
 include_directories(
+    ${CMAKE_CURRENT_SOURCE_DIR}
     ${PNG_INCLUDE_DIRS}
     ${ZLIB_INCLUDE_DIRS}
-    ${FREETYPE_INCLUDE_DIRS}
+    ${Freetype_INCLUDE_DIRS}
     ${OPENGL_INCLUDE_DIR}
     ${GLUT_INCLUDE_DIR}
     # Add others as needed
@@ -36,7 +47,7 @@ include_directories(
 set(MILLIONVIS_LIBS
     ${PNG_LIBRARIES}
     ${ZLIB_LIBRARIES}
-    ${FREETYPE_LIBRARIES}
+    ${Freetype_LIBRARIES}
     ${OPENGL_LIBRARIES}
     ${GLUT_LIBRARIES}
     # Add others as needed

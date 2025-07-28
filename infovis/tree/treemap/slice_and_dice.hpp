@@ -26,7 +26,7 @@
 #define INFOVIS_TREE_TREEMAP_SLICE_AND_DICE_HPP
 
 #include <infovis/alloc.hpp>
-#include <boost/config.hpp>
+// TODO: Removed boost/config.hpp - C++17 modernization
 #include <infovis/tree/tree_traits.hpp>
 #include <infovis/tree/tree_concepts.hpp>
 #include <infovis/tree/sum_weight_visitor.hpp>

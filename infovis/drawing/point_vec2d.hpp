@@ -50,8 +50,8 @@ struct point2d : point_<2, Coord>
 #endif
 
   point2d(const Coord& x, const Coord& y) {
-    at(0) = x;
-    at(1) = y;
+    this->at(0) = x;
+    this->at(1) = y;
   }
 
 };
@@ -97,8 +97,8 @@ struct vector2d : vector_<2, Coord>
 #endif
 
   vector2d(const Coord& dx, const Coord& dy) {
-    at(0) = dx;
-    at(1) = dy;
+    this->at(0) = dx;
+    this->at(1) = dy;
   }
 
 };

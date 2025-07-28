@@ -26,12 +26,13 @@
 #define INFOVIS_TREE_TREEMAP_SQUARIFIED_HPP
 
 #include <infovis/alloc.hpp>
-#include <boost/config.hpp>
+// TODO: Removed boost/config.hpp - C++17 modernization
 #include <infovis/tree/tree.hpp>
 #include <infovis/tree/tree_concepts.hpp>
 #include <infovis/tree/sum_weight_visitor.hpp>
 #include <infovis/tree/treemap/treemap.hpp>
 #include <infovis/tree/treemap/drawing/drawer.hpp>
+#include <tuple> // TODO: Added for std::tie - C++17 modernization
 
 #include <cassert>
 
@@ -103,7 +104,8 @@ struct treemap_squarified
     unsigned ret = 1;
 
     children_iterator i, end;
-    boost::tie(i,end) = children(n, tree_);
+    // TODO: Replaced boost::tie with std::tie - C++17 modernization
+    std::tie(i,end) = children(n, tree_);
     float scale = width(b) * height(b) / tw;
     if (scale == 0) {
 #if 0

@@ -26,8 +26,7 @@
 #define INFOVIS_DRAWING_COLOR_HPP
 
 #include <infovis/alloc.hpp>
-#include <boost/config.hpp>
-#include <boost/detail/select_type.hpp>
+// TODO: Removed boost/config.hpp and boost/detail/select_type.hpp - modernized to C++17
 #include <infovis/drawing/colors/detail.hpp>
 #include <limits>
 #include <utility>
@@ -76,20 +75,20 @@ struct color_type : public S
     
   color_type() { }
   explicit color_type(const T& val) {
-    for (int chan = 0; chan < last_channel; chan++) {
+    for (int chan = 0; chan < S::last_channel; chan++) {
       channel[chan] = val;
     }
   }
   template <class ChannelIt>
   color_type(ChannelIt start, ChannelIt end) {
-    for (int chan = 0; chan < last_channel; chan++) {
+    for (int chan = 0; chan < S::last_channel; chan++) {
       if (start != end)
 	channel[chan] = *start++;
     }
   }
   friend std::pair<const_iterator,const_iterator>
   channels(const color_type& c) {
-    return std::make_pair(c.channel, c.channel+last_channel);
+    return std::make_pair(c.channel, c.channel+S::last_channel);
   }
   const channel_type& operator[](int i) const { return channel[i]; }
   channel_type& operator[](int i) { return channel[i]; }
@@ -100,8 +99,8 @@ struct color_type : public S
 
   iterator begin() { return channel; }
   const_iterator begin() const { return channel; }
-  iterator end() { return channel + last_channel; }
-  const_iterator end() const { return channel + last_channel; }
+  iterator end() { return channel + S::last_channel; }
+  const_iterator end() const { return channel + S::last_channel; }
 
   bool is_valid() const { return true; }
 };
@@ -118,37 +117,37 @@ struct color_rgb : public color_type<T, color_space_rgb>
   typedef color_type<T, color_space_rgb> super;
 
   color_rgb() {
-    channel[red] = one();
-    channel[green] = one();
-    channel[blue] = one();
+    this->channel[color_space_rgb::red] = super::one();
+    this->channel[color_space_rgb::green] = super::one();
+    this->channel[color_space_rgb::blue] = super::one();
   }
   explicit color_rgb(const T& val) : super(val) {}
   template <class S>
   color_rgb(const color_rgb<S>& r) {
-    for (int chan = 0; chan < last_channel; chan++) {
-      infovis::detail::convert(channel[chan],r.channel[chan]);
+    for (int chan = 0; chan < color_space_rgb::last_channel; chan++) {
+      infovis::detail::convert(this->channel[chan],r.channel[chan]);
     }
   }
 
   template <class ChannelIt>
   color_rgb(ChannelIt start, ChannelIt end) {
     int chan;
-    for (chan = 0; chan < last_channel; chan++) {
+    for (chan = 0; chan < color_space_rgb::last_channel; chan++) {
       if (start != end)
-	channel[chan] = *start++;
+	this->channel[chan] = *start++;
     }
-    while(chan < last_channel)
-      channel[chan++] = T(0);
+    while(chan < color_space_rgb::last_channel)
+      this->channel[chan++] = T(0);
   }
   color_rgb(unsigned int r, unsigned int g, unsigned int b) {
-    channel[red]   = T(r * super::one() / 255);
-    channel[green] = T(g * super::one() / 255);
-    channel[blue]  = T(b * super::one() / 255);
+    this->channel[color_space_rgb::red]   = T(r * super::one() / 255);
+    this->channel[color_space_rgb::green] = T(g * super::one() / 255);
+    this->channel[color_space_rgb::blue]  = T(b * super::one() / 255);
   }
   color_rgb(double r, double g, double b) {
-    detail::round(channel[red], r * super::one());
-    detail::round(channel[green], g * super::one());
-    detail::round(channel[blue], b * super::one());
+    detail::round(this->channel[color_space_rgb::red], r * super::one());
+    detail::round(this->channel[color_space_rgb::green], g * super::one());
+    detail::round(this->channel[color_space_rgb::blue], b * super::one());
   }
 };
 
@@ -160,42 +159,42 @@ struct color_rgba : public color_type<T, color_space_rgba>
 {
   typedef color_type<T, color_space_rgba> super;
   color_rgba() {
-    channel[red] = super::one();
-    channel[green] = super::one();
-    channel[blue] = super::one();
-    channel[alpha] = super::one();
+    this->channel[color_space_rgba::red] = super::one();
+    this->channel[color_space_rgba::green] = super::one();
+    this->channel[color_space_rgba::blue] = super::one();
+    this->channel[color_space_rgba::alpha] = super::one();
   }
   color_rgba(const color_rgb<T>& c);
   explicit color_rgba(const T& val) : super(val)  { }
   template <class S>
   color_rgba(const color_rgba<S>& r) {
-    for (int chan = 0; chan < last_channel; chan++) {
-      infovis::detail::convert(channel[chan], r.channel[chan]);
+    for (int chan = 0; chan < color_space_rgba::last_channel; chan++) {
+      infovis::detail::convert(this->channel[chan], r.channel[chan]);
     }
   }
 
   template <class ChannelIt>
   color_rgba(ChannelIt start, ChannelIt end) {
     int chan;
-    for (chan = 0; chan < last_channel; chan++) {
+    for (chan = 0; chan < color_space_rgba::last_channel; chan++) {
       if (start != end)
-	channel[chan] = *start++;
+	this->channel[chan] = *start++;
     }
-    while(chan < last_channel)
-      channel[chan++] = super::one();
+    while(chan < color_space_rgba::last_channel)
+      this->channel[chan++] = super::one();
   }
   color_rgba(unsigned int r, unsigned int g, unsigned int b,
 	     unsigned int a = 255) {
-    channel[red]   = T(r * super::one() / 255);
-    channel[green] = T(g * super::one() / 255);
-    channel[blue]  = T(b * super::one() / 255);
-    channel[alpha] = T(a * super::one() / 255);
+    this->channel[color_space_rgba::red]   = T(r * super::one() / 255);
+    this->channel[color_space_rgba::green] = T(g * super::one() / 255);
+    this->channel[color_space_rgba::blue]  = T(b * super::one() / 255);
+    this->channel[color_space_rgba::alpha] = T(a * super::one() / 255);
   }
   color_rgba(double r, double g, double b, double a = 1.0) {
-    detail::round(channel[red], r * super::one());
-    detail::round(channel[green], g * super::one());
-    detail::round(channel[blue], b * super::one());
-    detail::round(channel[alpha], a * super::one());
+    detail::round(this->channel[color_space_rgba::red], r * super::one());
+    detail::round(this->channel[color_space_rgba::green], g * super::one());
+    detail::round(this->channel[color_space_rgba::blue], b * super::one());
+    detail::round(this->channel[color_space_rgba::alpha], a * super::one());
   }
 };
 
@@ -203,26 +202,26 @@ template <class T>
 inline
 color_rgba<T>::color_rgba(const color_rgb<T>& r)
 {
-  for (int chan = 0; chan < r.last_channel; chan++) {
-    channel[chan] = r.channel[chan];
+  for (int chan = 0; chan < color_space_rgb::last_channel; chan++) {
+    this->channel[chan] = r.channel[chan];
   }
-  channel[alpha] = one();
+  this->channel[color_space_rgba::alpha] = super::one();
 }
 
 template <class S, class T>
 inline void
 convert(color_rgba<S>& rgba, const color_rgb<T>& c)
 {
-  for (int chan = 0; chan < color_rgb<T>::last_channel; chan++)
+  for (int chan = 0; chan < color_space_rgb::last_channel; chan++)
     infovis::detail::convert(rgba[chan], c[chan]);
-  rgba[color_rgba<T>::alpha] = color_rgba<T>::one();
+  rgba[color_space_rgba::alpha] = color_rgba<S>::one();
 }
 
 template <class S, class T>
 inline void
 convert(color_rgb<S>& rgba, const color_rgba<T>& c)
 {
-  for (int chan = 0; chan < color_rgb<S>::last_channel; chan++)
+  for (int chan = 0; chan < color_space_rgb::last_channel; chan++)
     infovis::detail::convert(rgba[chan], c[chan]);
 }
 

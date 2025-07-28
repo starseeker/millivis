@@ -29,6 +29,7 @@
 #include <infovis/tree/tree_traits.hpp>
 #include <infovis/tree/visitor.hpp>
 #include <vector>
+#include <tuple> // TODO: Added for std::tie - C++17 modernization
 
 namespace infovis {
 
@@ -54,7 +55,8 @@ struct sum_weight_visitor
     if (! is_leaf(n, tree_)) {
       weight_[n] = 0;
       children_iterator i, e;
-      boost::tie(i, e) = children(n, tree_);
+      // TODO: Replaced boost::tie with std::tie - C++17 modernization
+      std::tie(i, e) = children(n, tree_);
       while (i != e) {
 	weight_[n] += weight_[*i];
 	++i;

@@ -66,7 +66,7 @@ template <int Dim, class Coord>
 inline std::istream&
 operator >> (std::istream& in, vector_<Dim, Coord>& v)
 {
-  in.ignore(strlen(typeid(p).name()+1));
+  in.ignore(strlen(typeid(v).name()+1));
   CFOREACH { in >> v[i]; in.ignore(1); }
   return in;
 }

@@ -85,7 +85,8 @@ is_null_box(const Box& b)
 void
 AnimateBoxList::render(float param)
 {
-  unsigned last = std::min(start_.size(), end_.size());
+  // TODO: Fixed type compatibility for C++17 - use size_type consistently 
+  std::size_t last = std::min(start_.size(), end_.size());
   last = std::min(last, tex_coords_.size());
   glPushAttrib(GL_COLOR_BUFFER_BIT | GL_ENABLE_BIT);
   glEnable(GL_TEXTURE_2D);
@@ -98,7 +99,7 @@ AnimateBoxList::render(float param)
   std::vector<Point> tex_coords(last*4);
   //glBegin(GL_QUADS);
   int j = 0;
-  for (int i = 0; i < last; i++) {
+  for (std::size_t i = 0; i < last; i++) {
     const Box& from = start_[i];
     const Box& to = end_[i];
     const Box& tex = tex_coords_[i];

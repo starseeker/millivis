@@ -24,7 +24,8 @@
  */
 #include <infovis/drawing/FontFT.hpp>
 #include <infovis/drawing/gl.hpp>
-#include <boost/directory.h>
+// TODO: Replaced boost/directory.h with std::filesystem for C++17 modernization
+#include <filesystem>
 
 #include <freetype/freetype.h>
 #include <freetype/ftglyph.h>
@@ -580,7 +581,7 @@ static FontMap font_map;
 
 FontFTCreator::FontFTCreator()
 {
-  using namespace boost::filesystem;
+  // TODO: Replaced boost::filesystem with std::filesystem for C++17 modernization
 #ifdef PRINT
   std::cout << "Starting scanning of font dir\n";
 #endif
@@ -588,10 +589,12 @@ FontFTCreator::FontFTCreator()
   // for a local font path
   for (int d = 0; font_dirs[d] != NULL; d++) {
     const char * font_dir = font_dirs[d];
-    for (dir_it it(font_dir); it != dir_it(); ++it) {
-      if (boost::filesystem::get<is_directory>(it))
+    if (!std::filesystem::exists(font_dir)) continue;
+    
+    for (const auto& entry : std::filesystem::directory_iterator(font_dir)) {
+      if (entry.is_directory())
 	continue;
-      string fname = string(font_dir)+"/"+*it;
+      string fname = entry.path().string();
       FT_Face face;
       int res = FT_New_Face(_FT_Library, fname.c_str(), 0, &face);
       if (res == 0) {

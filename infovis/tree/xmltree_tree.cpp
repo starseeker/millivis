@@ -27,6 +27,7 @@
 #include <zlib.h>
 #include <vector>
 #include <cstdlib>
+#include <cstring> // TODO: Added for strcmp - C++17 modernization
 
 namespace infovis {
 typedef tree Tree;

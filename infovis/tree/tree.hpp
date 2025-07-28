@@ -30,6 +30,7 @@
 #include <infovis/tree/tree_traits.hpp>
 #include <stdexcept>
 #include <cassert>
+#include <algorithm> // TODO: Added for std::sort - C++17 modernization
 
 namespace infovis {
 

@@ -81,7 +81,8 @@ void set_color(const Color& c, S)
 template <class Color>
 void set_color(const Color& c)
 {
-  set_color(c, color_space_traits<Color>::color_space());
+  // TODO: Fixed typename for template-dependent name - C++17 modernization
+  set_color(c, typename color_space_traits<Color>::color_space());
 }
 
 template <class Coord>

@@ -44,22 +44,22 @@ struct color_hvc : public color_type<float, color_space_hvc>
   template <class ChannelIt>
   color_hvc(ChannelIt start, ChannelIt end) {
     int chan;
-    for (chan = 0; chan < last_channel; chan++) {
+    for (chan = 0; chan < color_space_hvc::last_channel; chan++) {
       if (start != end)
-	channel[chan] = *start++;
+	this->channel[chan] = *start++;
     }
-    while(chan < last_channel)
-      channel[chan++] = T(0);
+    while(chan < color_space_hvc::last_channel)
+      this->channel[chan++] = float(0);
   }
   color_hvc(float h, float v, float c) {
-    channel[hue] = h;
-    channel[value] = v;
-    channel[chroma] = c;
+    this->channel[color_space_hvc::hue] = h;
+    this->channel[color_space_hvc::value] = v;
+    this->channel[color_space_hvc::chroma] = c;
   }
   color_hvc(double h, double v, double c) {
-    channel[hue] = h;
-    channel[value] = v;
-    channel[chroma] = c;
+    this->channel[color_space_hvc::hue] = h;
+    this->channel[color_space_hvc::value] = v;
+    this->channel[color_space_hvc::chroma] = c;
   }
 
   bool is_valid() const;

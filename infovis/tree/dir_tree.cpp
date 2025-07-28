@@ -25,7 +25,8 @@
 #include <infovis/tree/tree.hpp>
 #include <infovis/table/metadata.hpp>
 #include <infovis/tree/sum_weight_visitor.hpp>
-#include <boost/directory.h>
+// TODO: Replaced boost/directory.h with std::filesystem - C++17 modernization
+#include <filesystem>
 #include <sys/stat.h>
 #include <iostream>
 #include <list>
@@ -47,7 +48,7 @@ struct dir_tree_builder
     
 
   unsigned build(node_descriptor parent, const std::string& dirname) {
-    using namespace boost::filesystem;
+    // TODO: Replaced boost::filesystem with std::filesystem - C++17 modernization
     unsigned ret = 0;
     typedef std::list<std::string>  DirQueue;
     DirQueue dir_queue;
@@ -64,29 +65,37 @@ struct dir_tree_builder
       parent = parent_queue.front();
       parent_queue.pop_front();
       std::cerr << "Reading dir " << dirname << std::endl;
-      for (dir_it it(dirname); it != dir_it(); ++it) {
-	if ((*it)[0] == '.')
+      
+      if (!std::filesystem::exists(dirname)) continue;
+      
+      for (const auto& entry : std::filesystem::directory_iterator(dirname)) {
+	std::string filename = entry.path().filename().string();
+	if (filename[0] == '.')
 	  continue;
 	ret++;
 	node_descriptor n = add_node(parent, tree_);
-	size_->set(n, boost::filesystem::get<size>(it));
-	type_->set(n, boost::filesystem::get<is_directory>(it) ? 1 : 0);
+	
+	std::error_code ec;
+	auto file_size = std::filesystem::file_size(entry.path(), ec);
+	size_->set(n, ec ? 0 : static_cast<long>(file_size));
+	
+	type_->set(n, entry.is_directory() ? 1 : 0);
 	struct stat s;
-	stat((dirname+(*it)).c_str(), &s);
+	stat(entry.path().c_str(), &s);
 
 	mtime_->set(n, s.st_mtime);
 	ctime_->set(n, s.st_ctime);
 	atime_->set(n, s.st_atime);
 
-	if (boost::filesystem::get<is_directory>(it)) {
-	  std::string name = *it + "/";
+	if (entry.is_directory()) {
+	  std::string name = filename + "/";
 	  name_->set(n, name);
 	  //ret += build(n, dirname+name);
-	  dir_queue.push_front(dirname+name);
+	  dir_queue.push_front(entry.path().string() + "/");
 	  parent_queue.push_front(n);
 	}
 	else
-	  name_->set(n, *it);
+	  name_->set(n, filename);
       }
     }
     return ret;
