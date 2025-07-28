@@ -40,42 +40,32 @@ namespace infovis {
 template <class DAContainer>
 struct weight_interpolator
 {
-  typedef typename DAContainer::value_type value_type;
+  using value_type = typename DAContainer::value_type;
 
   const DAContainer* from;
   const DAContainer* to;
   float param;
   float balance;
 
-  weight_interpolator(const DAContainer& f, const DAContainer& t)
+  weight_interpolator(const DAContainer& f, const DAContainer& t) noexcept
     : from(&f), to(&t), param(0), balance(1) {}
 
-  weight_interpolator(const weight_interpolator& other)
-    : from(other.from),
-      to(other.to),
-      param(other.param),
-      balance(other.balance) { }
+  weight_interpolator(const weight_interpolator& other) = default;
 
-  weight_interpolator& operator = (const weight_interpolator& other) {
-    from = other.from;
-    to = other.to;
-    param = other.param;
-    balance = other.balance;
-    return *this;
-  }
-  void set_param(float p) { param = p; }
-  float get_param() const { return param; }
-  void set_balance(float b) { balance = b; }
-  float get_balance() const { return balance; }
+  weight_interpolator& operator=(const weight_interpolator& other) = default;
+  
+  void set_param(float p) noexcept { param = p; }
+  float get_param() const noexcept { return param; }
+  void set_balance(float b) noexcept { balance = b; }
+  float get_balance() const noexcept { return balance; }
   void set_std_balance() { balance = (*from)[0] / (*to)[0]; }
 
   value_type operator[](int i) const {
     float f = (*from)[i];
     float t = (*to)[i];
-    float ret =
-      (1.0f - param) * f + param * t * balance;
+    float ret = (1.0f - param) * f + param * t * balance;
 #if 0
-    if (_isnan(ret)) {
+    if (std::isnan(ret)) {
       std::cerr << "nan found at index " << i << std::endl;
       return 0.0f;
     }

@@ -57,6 +57,7 @@
 #include <cmath>
 #include <cfloat>
 #include <cstdlib>
+#include <tuple>
 #include <iostream>
 #ifdef WIN32
 #define isnan _isnan
@@ -297,7 +298,7 @@ compute_file_types(Tree& t)
   FileType ft;
   ft.load("file_types.txt");
   column * c = t.find_column("name");
-  if (c == 0)
+  if (c == nullptr)
     return false;
 
   StringColumn& name = *StringColumn::cast(c);
@@ -317,8 +318,8 @@ struct log_fn {
   const WeightMap& wm;
   log_fn(const WeightMap& w) : wm(w) { }
   float operator()(int i) const {
-    double d = log(wm[i]+1.0);
-    if (isnan(d)) {
+    double d = std::log(wm[i]+1.0);
+    if (std::isnan(d)) {
       std::cerr << "got a nan for wm[" << i << "] = " << wm[i] << std::endl;
       return 0;
     }
@@ -338,8 +339,8 @@ struct sqrt_fn {
   const WeightMap& wm;
   sqrt_fn(const WeightMap& w) : wm(w) { }
   float operator()(node_descriptor n) const {
-    double d = sqrt(wm[n]);
-    if (isnan(d)) {
+    double d = std::sqrt(wm[n]);
+    if (std::isnan(d)) {
       std::cerr << "got a nan for wm[" << n << "] = " << wm[n] << std::endl;
       return 0;
     }
@@ -373,7 +374,7 @@ add_metadata(Tree& t)
     if (col->get_name()[0] == '$')
       continue;			// don't look at internal columns
     FloatColumn * flt = FloatColumn::cast(col);
-    if (flt == 0)
+    if (flt == nullptr)
       continue;			// don't worry about string columns for now
     
   }
@@ -389,7 +390,7 @@ struct loader {
   { }
 
   void operator()() {
-    if (toload == 0) {
+    if (toload == nullptr) {
       toload = ".";
       std::cout << "Loading current directory\n";
       dir_tree(".", t);
@@ -419,7 +420,7 @@ static bool is_sum_weights(node_descriptor n,
     return true;
   float sum = 0;
   Tree::children_iterator i, e;
-  boost::tie(i, e) = children(n, t);
+  std::tie(i, e) = children(n, t);
   while (i != e) {
     if (! is_sum_weights(*i, t, c))
       return false;
@@ -530,17 +531,16 @@ int main(int argc, char * argv[])
       break;
     }
   }
-  if (weight == 0) {
-    for (Tree::names_iterator n = t.begin_names();
-	 n != t.end_names(); n++) {
+  if (weight == nullptr) {
+    for (auto n = t.begin_names(); n != t.end_names(); ++n) {
       prop = *n;
-      FloatColumn * c = FloatColumn::cast(t.find_column(prop));
-      if (c != 0) {
-	  weight = c;
-	  break;
+      FloatColumn* c = FloatColumn::cast(t.find_column(prop));
+      if (c != nullptr) {
+        weight = c;
+        break;
       }
     }
-    if (weight == 0) {
+    if (weight == nullptr) {
       std::cerr << "Cannot find a weight column\n";
       return 1;
     }

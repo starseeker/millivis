@@ -26,6 +26,7 @@
 #define TREEMAP2_LAYOUTVISUSD_HPP
 
 #include <infovis/tree/treemap/slice_and_dice.hpp>
+#include <infovis/tree/treemap/drawing/weight_interpolator.hpp>
 
 #include <LiteTreemap.hpp>
 #include <LayoutVisu.hpp>

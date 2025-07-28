@@ -53,13 +53,13 @@ DynamicQueries::DynamicQueries(LiteTreemap * tm,
     if (prop[0] == '$') // skip local columns
       continue;
     const FloatColumn * flt = FloatColumn::cast(col);
-    if (flt != 0) {
+    if (flt != nullptr) {
       create_numeric(flt);
     }
     else {
-      const StringColumn * str = StringColumn::cast(col);
-      if (str != 0) {
-	create_string(str);
+      const StringColumn* str = StringColumn::cast(col);
+      if (str != nullptr) {
+        create_string(str);
       }
     }
   }
@@ -124,7 +124,7 @@ DynamicQueries::filter(int index, const BoundedRange * range)
 {
   const FloatColumn * col = FloatColumn::cast(column_[index]);
 
-  if (col == 0)
+  if (col == nullptr)
     return;
   int time = LiteWindow::time();
 

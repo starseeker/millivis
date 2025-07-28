@@ -118,7 +118,7 @@ struct VertexInfo {
     : x_(x), y_(y), z_(z), tex_(t) { }
 };
 
-typedef std::vector<VertexInfo> VertexTable;
+using VertexTable = std::vector<VertexInfo>;
 
 void
 LayoutVisuScatterPlot::renderFastScatterPlot(float param)

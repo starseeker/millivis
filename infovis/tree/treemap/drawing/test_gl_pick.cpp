@@ -30,7 +30,7 @@
 #include <infovis/tree/treemap/drawing/gl_drawer.hpp>
 #include <infovis/tree/treemap/drawing/debug_drawer.hpp>
 #include <infovis/tree/treemap/drawing/pick_drawer.hpp>
-#include <boost/directory.h>
+#include <filesystem>
 #include <iostream>
 #include <cmath>
 
@@ -56,15 +56,35 @@ static void build_tree(node_descriptor parent,
 		       std::vector<std::string,gc_alloc<std::string> >& names,
 		       std::vector<float,gc_alloc<float,true> >& wm)
 {
-  using namespace boost::filesystem;
-  for (dir_it it(dirname); it != dir_it(); ++it) {
-    if ((*it)[0] == '.')
+  namespace fs = std::filesystem;
+  std::error_code ec;
+  
+  for (const auto& entry : fs::directory_iterator(dirname, ec)) {
+    if (ec) {
+      // Handle error gracefully - skip directory if we can't read it
       continue;
+    }
+    
+    auto filename = entry.path().filename().string();
+    if (filename[0] == '.')
+      continue;
+      
     node_descriptor n = add_node(parent, tree);
-    names.push_back(*it);
-    wm.push_back(boost::filesystem::get<size>(it));
-    if (boost::filesystem::get<is_directory>(it))
-      build_tree(n, tree, dirname+"/"+(*it), names, wm);
+    names.push_back(filename);
+    
+    // Get file size safely
+    std::uintmax_t file_size = 0;
+    if (entry.is_regular_file(ec) && !ec) {
+      file_size = entry.file_size(ec);
+    }
+    if (ec) {
+      file_size = 0; // Default to 0 if we can't get size
+    }
+    wm.push_back(static_cast<float>(file_size));
+    
+    if (entry.is_directory(ec) && !ec) {
+      build_tree(n, tree, entry.path().string(), names, wm);
+    }
   }
 }
 
@@ -139,9 +159,8 @@ static void passive_motion(int x, int y)
       gl::color(0.0, 0.0, 0.0);
       gl::raster_pos(5, 5);
       const std::string& name = names[h];
-      for (std::string::const_iterator i = name.begin();
-	   i != name.end(); i++) {
-	glutBitmapCharacter(GLUT_BITMAP_9_BY_15, *i);
+      for (char c : name) {
+	glutBitmapCharacter(GLUT_BITMAP_9_BY_15, c);
       }
 #ifdef DOUBLE_BUFFER
       glDrawBuffer(GL_FRONT);
@@ -194,8 +213,8 @@ int main(int argc, char * argv[])
   }
   
   wm.resize(lwm.size());
-  for (int i = 0; i < wm.size(); i++) {
-    wm[i] = log(lwm[i] + 1.0);
+  for (size_t i = 0; i < wm.size(); ++i) {
+    wm[i] = std::log(lwm[i] + 1.0f);
   }
   sum_weights(t, wm);
   sort(t, compare_weight(wm));

@@ -116,20 +116,19 @@ ControlsTab::ControlsTab(LiteTreemap * tm,
 
   queries_ = new LiteBox(new LayoutTable(2));
 
-  for (Tree::names_iterator n = tree_.begin_names();
-       n != tree_.end_names(); n++) {
+  for (auto n = tree_.begin_names(); n != tree_.end_names(); ++n) {
     const string& prop = *n;
-    const column * col = tree_.find_column(prop);
+    const column* col = tree_.find_column(prop);
     if (prop[0] == '$') // skip local columns
       continue;
-    const FloatColumn * flt = FloatColumn::cast(col);
-    if (flt != 0) {
+    const FloatColumn* flt = FloatColumn::cast(col);
+    if (flt != nullptr) {
       create_numeric(flt);
     }
     else {
-      const StringColumn * str = StringColumn::cast(col);
-      if (str != 0) {
-	create_string(str);
+      const StringColumn* str = StringColumn::cast(col);
+      if (str != nullptr) {
+        create_string(str);
       }
     }
   }
@@ -387,7 +386,7 @@ ControlsTab::filter(int index)
   const FloatColumn * col = FloatColumn::cast(column_[index]);
   const BoundedRange * range = slider_[index]->getObservable()->getBoundedRange();
 
-  if (col == 0)
+  if (col == nullptr)
     return;
   int time = LiteWindow::time();
   float min = range->value();
@@ -408,9 +407,9 @@ ControlsTab::filter(int index)
   const unsigned mask = 1 << index;
   const unsigned not_mask = ~mask;
 
-  for (int i = 0; i < col->size(); i++) {
-    if (! col->defined(i) ||
-	! in_range(col->fast_get(i), min , max)) {
+  for (size_t i = 0; i < col->size(); i++) {
+    if (!col->defined(i) ||
+        !in_range(col->fast_get(i), min, max)) {
       (*filter_)[i] |= mask;
       filtered++;
     }
@@ -521,13 +520,13 @@ ControlsTab::updateBoundedRange(BoundedRangeObservable * obs)
 static void
 set_children_visible(Lite * l, bool v)
 {
-  for (int i = 0; i < l->childCount(); i++) {
-    Lite * child = l->getChild(i);
+  for (size_t i = 0; i < l->childCount(); i++) {
+    Lite* child = l->getChild(i);
     child->setVisible(v);
     if (v) {
-      LiteSlider * slider = dynamic_cast<LiteSlider*>(child);
-      if (slider != 0)
-	slider->setFont(0);
+      LiteSlider* slider = dynamic_cast<LiteSlider*>(child);
+      if (slider != nullptr)
+        slider->setFont(nullptr);
     }
   }
 }
@@ -535,13 +534,13 @@ set_children_visible(Lite * l, bool v)
 static bool
 set_label_visible(Lite * container, Lite * l)
 {
-  for (int i = 0; i < container->childCount(); i++) {
-    Lite * child = container->getChild(i);
+  for (size_t i = 0; i < container->childCount(); i++) {
+    Lite* child = container->getChild(i);
     if (child == l) {
       child->setVisible(true);
       if (i != 0) {
-	child = container->getChild(i-1);
-	child->setVisible(true);
+        child = container->getChild(i-1);
+        child->setVisible(true);
       }
       return true;
     }
@@ -638,17 +637,16 @@ void
 ControlsTab::fill_weight_attributes_menu()
 {
   weight_attributes_menu_->removeAll();
-  for (Tree::names_iterator n = tree_.begin_names();
-       n != tree_.end_names(); n++) {
+  for (auto n = tree_.begin_names(); n != tree_.end_names(); ++n) {
     const string& prop = *n;
     if (prop[0] == '$')
       continue;
-    FloatColumn * flt = FloatColumn::cast(tree_.find_column(prop));
-    if (flt != 0) {
+    FloatColumn* flt = FloatColumn::cast(tree_.find_column(prop));
+    if (flt != nullptr) {
       if (flt->get_metadata(metadata::aggregate) != metadata::aggregate_sum)
-	weight_attributes_menu_->addItem("*"+prop);
+        weight_attributes_menu_->addItem("*"+prop);
       else
-	weight_attributes_menu_->addItem(prop);
+        weight_attributes_menu_->addItem(prop);
     }
   }
 }
@@ -662,11 +660,11 @@ ControlsTab::setWeightAttribute(const string& prop)
     prop_name = prop.substr(1);
   else
     prop_name = prop;
-  if (tree_.find_column(prop_name) == 0)
+  if (tree_.find_column(prop_name) == nullptr)
     return;
-  for (int i = 0; i < weight_attributes_menu_->childCount(); i++) {
+  for (size_t i = 0; i < weight_attributes_menu_->childCount(); i++) {
     if (prop == weight_attributes_menu_->getItem(i)) {
-      weight_attributes_combo_->setSelectedMenuItem(i);
+      weight_attributes_combo_->setSelectedMenuItem(static_cast<int>(i));
       break;
     }
   }
@@ -680,13 +678,12 @@ ControlsTab::fill_x_attributes_menu()
 {
   x_attributes_menu_->removeAll();
 
-  for (Tree::names_iterator n = tree_.begin_names();
-       n != tree_.end_names(); n++) {
+  for (auto n = tree_.begin_names(); n != tree_.end_names(); ++n) {
     const string& prop = *n;
     if (prop[0] == '$')
       continue;
-    FloatColumn * flt = FloatColumn::cast(tree_.find_column(prop));
-    if (flt != 0) {
+    FloatColumn* flt = FloatColumn::cast(tree_.find_column(prop));
+    if (flt != nullptr) {
       //std::cerr << "adding " << prop << " to x_attributes_menu_\n";
       x_attributes_menu_->addItem(prop);
     }
@@ -700,9 +697,9 @@ ControlsTab::setXAttribute(const string& prop)
 //   if (prop == treemap_->getXAxisProp())
 //     return;
   //std::cerr << "setting x_attribute to " << prop << std::endl;
-  for (int i = 0; i < x_attributes_menu_->childCount(); i++) {
+  for (size_t i = 0; i < x_attributes_menu_->childCount(); i++) {
     if (prop == x_attributes_menu_->getItem(i)) {
-      x_attributes_combo_->setSelectedMenuItem(i);
+      x_attributes_combo_->setSelectedMenuItem(static_cast<int>(i));
       //std::cerr << "x_attribute found at index " << i << std::endl;
       break;
     }
@@ -718,13 +715,12 @@ ControlsTab::fill_y_attributes_menu()
 {
   y_attributes_menu_->removeAll();
 
-  for (Tree::names_iterator n = tree_.begin_names();
-       n != tree_.end_names(); n++) {
+  for (auto n = tree_.begin_names(); n != tree_.end_names(); ++n) {
     const string& prop = *n;
     if (prop[0] == '$')
       continue;
-    FloatColumn * flt = FloatColumn::cast(tree_.find_column(prop));
-    if (flt != 0) {
+    FloatColumn* flt = FloatColumn::cast(tree_.find_column(prop));
+    if (flt != nullptr) {
       //std::cerr << "adding " << prop << " to y_attributes_menu_\n";
       y_attributes_menu_->addItem(prop);
     }
@@ -738,9 +734,9 @@ ControlsTab::setYAttribute(const string& prop)
 //   if (prop == treemap_->getYAxisProp())
 //     return;
   //std::cerr << "setting y_attribute to " << prop << std::endl;
-  for (int i = 0; i < y_attributes_menu_->childCount(); i++) {
+  for (size_t i = 0; i < y_attributes_menu_->childCount(); i++) {
     if (prop == y_attributes_menu_->getItem(i)) {
-      y_attributes_combo_->setSelectedMenuItem(i);
+      y_attributes_combo_->setSelectedMenuItem(static_cast<int>(i));
       //std::cerr << "y_attribute found at index " << i << std::endl;
       break;
     }
@@ -755,13 +751,12 @@ void
 ControlsTab::fill_color_attributes_menu()
 {
   color_attributes_menu_->removeAll();
-  for (Tree::names_iterator n = tree_.begin_names();
-       n != tree_.end_names(); n++) {
+  for (auto n = tree_.begin_names(); n != tree_.end_names(); ++n) {
     const string& prop = *n;
     if (prop[0] == '$')
       continue;
-    FloatColumn * flt = FloatColumn::cast(tree_.find_column(prop));
-    if (flt == 0)
+    FloatColumn* flt = FloatColumn::cast(tree_.find_column(prop));
+    if (flt == nullptr)
       continue;
     color_attributes_menu_->addItem(prop);
     if (prop == treemap_->getColorProp())
@@ -771,11 +766,11 @@ ControlsTab::fill_color_attributes_menu()
 void
 ControlsTab::setColorAttribute(const string& prop)
 {
-  if (tree_.find_column(prop) == 0)
+  if (tree_.find_column(prop) == nullptr)
     return;
-  for (int i = 0; i < color_attributes_menu_->childCount(); i++) {
+  for (size_t i = 0; i < color_attributes_menu_->childCount(); i++) {
     if (prop == color_attributes_menu_->getItem(i)) {
-      color_attributes_combo_->setSelectedMenuItem(i);
+      color_attributes_combo_->setSelectedMenuItem(static_cast<int>(i));
       break;
     }
   }
@@ -841,10 +836,9 @@ void
 ControlsTab::fill_sort_by_menu()
 {
   sort_by_menu_->addItem("original");
-  for (Tree::names_iterator n = tree_.begin_names();
-       n != tree_.end_names(); n++) {
+  for (auto n = tree_.begin_names(); n != tree_.end_names(); ++n) {
     const string& prop = *n;
-    if (FloatColumn::cast(tree_.find_column(prop)) == 0)
+    if (FloatColumn::cast(tree_.find_column(prop)) == nullptr)
       continue;
     sort_by_menu_->addItem("<"+prop);
     sort_by_menu_->addItem(">"+prop);
@@ -895,9 +889,9 @@ ControlsTab::sortBy(const string& order)
     else
       sort(tree_, greater_weight(*FloatColumn::find(order, tree_)));
   }
-  for (int i = 0; i < sort_by_menu_->childCount(); i++) {
+  for (size_t i = 0; i < sort_by_menu_->childCount(); i++) {
     if (order == sort_by_menu_->getItem(i)) {
-      sort_by_combo_->setSelectedMenuItem(i);
+      sort_by_combo_->setSelectedMenuItem(static_cast<int>(i));
       break;
     }
   }

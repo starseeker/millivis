@@ -33,6 +33,7 @@
 #include <infovis/drawing/direction.hpp>
 #include <infovis/tree/treemap/treemap.hpp>
 #include <infovis/tree/treemap/drawing/drawer.hpp>
+#include <infovis/tree/treemap/drawing/weight_interpolator.hpp>
 
 namespace infovis {
 
