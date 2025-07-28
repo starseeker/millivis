@@ -48,6 +48,7 @@ struct treemap_slice_and_dice :
     public treemap<Tree,Box,WeightMap,Drawer,Filter>
 {
   typedef treemap<Tree,Box,WeightMap,Drawer,Filter> super;
+  typedef typename super::coord_type coord_type;
   typedef typename super::dist_type dist_type;
   typedef typename super::children_iterator children_iterator;
   typedef typename super::node_descriptor node_descriptor;
@@ -69,33 +70,33 @@ struct treemap_slice_and_dice :
 		 typename tree_traits<Tree>::node_descriptor n,
 		 unsigned depth = 0)
   {
-    if (! drawer_.begin_box(box,n,depth))
+    if (! this->drawer_.begin_box(box,n,depth))
       return 0;
     Box b(box);
     unsigned ret = 1;
-    drawer_.draw_border(b, n, depth);
-    if (is_leaf(n,tree_)) {
-      drawer_.draw_box(b, n, depth);
+    this->drawer_.draw_border(b, n, depth);
+    if (is_leaf(n,this->tree_)) {
+      this->drawer_.draw_box(b, n, depth);
     }
     else {
-      const float tw = infovis::get(weight_, n);
+      const float tw = infovis::get(this->weight_, n);
 
-      drawer_.begin_strip(box, n, depth, dir);
+      this->drawer_.begin_strip(box, n, depth, dir);
       if (dir == left_to_right) {
 	dist_type w = width(b);
 	float x = xmin(b); // + w * weight_[n] / (2*tw);
 
 #if 0
 	if (x > xmin(b)) {
-	  drawer_.draw_box(Box(xmin(b),ymin(b),x,ymax(b)), n, depth);
+	  this->drawer_.draw_box(Box(xmin(b),ymin(b),x,ymax(b)), n, depth);
 	}
 #endif
 	children_iterator i,end;
-	for (boost::tie(i,end) = children(n,tree_); i != end; i++) {
+	for (std::tie(i,end) = children(n,this->tree_); i != end; i++) {
 	  node_descriptor child = *i;
-	  if (filter_(child))
+	  if (this->filter_(child))
 	    continue;
-	  float nw = w * infovis::get(weight_, child) / tw;
+	  float nw = w * infovis::get(this->weight_, child) / tw;
 	  float e = /*(i == (end-1)) ? xmax(b) : */coord_type(x+nw);
 	  ret += visit(flip(dir),
 		       Box(x,ymin(b),e,ymax(b)),
@@ -104,7 +105,7 @@ struct treemap_slice_and_dice :
 	}
 #if 0
 	if (x < xmax(b)) {
-	  drawer_.draw_box(Box(x,ymin(b),xmax(b),ymax(b)), n, depth);
+	  this->drawer_.draw_box(Box(x,ymin(b),xmax(b),ymax(b)), n, depth);
 	}
 #endif
       }
@@ -114,15 +115,15 @@ struct treemap_slice_and_dice :
 
 #if 0
 	if (y > ymin(b)) {
-	  drawer_.draw_box(Box(xmin(b),ymin(b),xmax(b),y), n, depth);
+	  this->drawer_.draw_box(Box(xmin(b),ymin(b),xmax(b),y), n, depth);
 	}
 #endif
 	children_iterator i,end;
-	for (boost::tie(i,end) = children(n,tree_); i != end; i++) {
+	for (std::tie(i,end) = children(n,this->tree_); i != end; i++) {
 	  node_descriptor child = *i;
-	  if (filter_(child))
+	  if (this->filter_(child))
 	    continue;
-	  float nh = h * infovis::get(weight_, child) / tw;
+	  float nh = h * infovis::get(this->weight_, child) / tw;
 	  float e = /* (i == (end-1)) ? ymax(b) : */coord_type(y+nh);
 	  ret += visit(flip(dir),
 		       Box(xmin(b),y,xmax(b),e), child, depth+1);
@@ -130,13 +131,13 @@ struct treemap_slice_and_dice :
 	}
 #if 0
 	if (y < ymax(b)) {
-	  drawer_.draw_box(Box(xmin(b),y,xmax(b),ymax(b)), n, depth);
+	  this->drawer_.draw_box(Box(xmin(b),y,xmax(b),ymax(b)), n, depth);
 	}
 #endif
       }
-      drawer_.end_strip(box, n, depth, dir);
+      this->drawer_.end_strip(box, n, depth, dir);
     }
-    drawer_.end_box(box,n,depth);
+    this->drawer_.end_box(box,n,depth);
     return ret;
   }
 };

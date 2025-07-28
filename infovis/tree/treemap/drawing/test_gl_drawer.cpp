@@ -37,7 +37,6 @@
 #include <infovis/tree/treemap/squarified.hpp>
 #include <infovis/tree/treemap/drawing/gl_drawer.hpp>
 #include <infovis/tree/treemap/drawing/debug_drawer.hpp>
-#include <boost/directory.h>
 #include <iostream>
 #include <cmath>
 

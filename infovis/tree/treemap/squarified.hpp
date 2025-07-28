@@ -82,17 +82,17 @@ struct treemap_squarified
 		 typename tree_traits<Tree>::node_descriptor n,
 		 unsigned depth = 0)
   {
-    if (! drawer_.begin_box(box,n,depth)) return 0;
+    if (! this->drawer_.begin_box(box,n,depth)) return 0;
     box_type b(box);
     unsigned ret = 1;
-    drawer_.draw_border(b, n, depth);
-    if (is_leaf(n,tree_)) {
-      drawer_.draw_box(b, n, depth);
+    this->drawer_.draw_border(b, n, depth);
+    if (is_leaf(n,this->tree_)) {
+      this->drawer_.draw_box(b, n, depth);
     }
     else {
       ret = visit_strips(b, n, depth);
     }
-    drawer_.end_box(box,n, depth);
+    this->drawer_.end_box(box,n, depth);
     return ret;
   }    
   
@@ -100,12 +100,12 @@ struct treemap_squarified
 			typename tree_traits<Tree>::node_descriptor n,
 			unsigned depth)
   {
-    const float tw = infovis::get(weight_,n);
+    const float tw = infovis::get(this->weight_,n);
     unsigned ret = 1;
 
     children_iterator i, end;
     // TODO: Replaced boost::tie with std::tie - C++17 modernization
-    std::tie(i,end) = children(n, tree_);
+    std::tie(i,end) = children(n, this->tree_);
     float scale = width(b) * height(b) / tw;
     if (scale == 0) {
 #if 0
@@ -119,7 +119,7 @@ struct treemap_squarified
 #endif
     }
     else while (i != end) {
-      if (filter_(*i)) {
+      if (this->filter_(*i)) {
 	continue;
       }
       if (orient_(b, n, depth)) {
@@ -127,7 +127,7 @@ struct treemap_squarified
 	float y = ymin(b);
 	float width;
 
-	drawer_.begin_strip(b, n, depth, bottom_to_top);
+	this->drawer_.begin_strip(b, n, depth, bottom_to_top);
 	children_iterator e = squarify(i, end, w, scale, width);
 	if (width == 0) {
 	  // can happen if all the remaining children have a weight==0
@@ -135,19 +135,19 @@ struct treemap_squarified
 	}
 	for (; i != e; i++) {
 	  node_descriptor child = *i;
-	  float nw = infovis::get(weight_,child) * scale / width;
+	  float nw = infovis::get(this->weight_,child) * scale / width;
 	  ret += visit(box_type(xmin(b),y,xmin(b)+width,y+nw),
 		       child, depth+1);
 	  y += nw;
 	}
 	set_xmin(b, width + xmin(b));
-	drawer_.end_strip(b, n, depth, bottom_to_top);
+	this->drawer_.end_strip(b, n, depth, bottom_to_top);
       }
       else {
 	dist_type w = width(b);
 	float x = xmin(b);
 	float width;
-	drawer_.begin_strip(b, n, depth, left_to_right);
+	this->drawer_.begin_strip(b, n, depth, left_to_right);
 	children_iterator e = squarify(i, end, w, scale, width);
 	if (width == 0) {
 	  // can happen if all the remaining children have a weight==0
@@ -155,13 +155,13 @@ struct treemap_squarified
 	}
 	for (; i != e; i++) {
 	  node_descriptor child = *i;
-	  float nw = infovis::get(weight_,child) * scale / width;
+	  float nw = infovis::get(this->weight_,child) * scale / width;
 	  ret += visit(box_type(x, ymin(b), x+nw, ymin(b)+width),
 		       child, depth+1);
 	  x += nw;
 	}
 	set_ymin(b, width + ymin(b));
-	drawer_.end_strip(b, n, depth, left_to_right);
+	this->drawer_.end_strip(b, n, depth, left_to_right);
       }
     }
     return ret;
@@ -176,8 +176,8 @@ struct treemap_squarified
     assert(length != 0);
     float s = 0;
     while (beg != end && s == 0) {
-      if (! filter_(*beg))
-	s = infovis::get(weight_,*beg++) * scale;
+      if (! this->filter_(*beg))
+	s = infovis::get(this->weight_,*beg++) * scale;
     }
     width = s / length;
     if (beg == end) {
@@ -189,9 +189,9 @@ struct treemap_squarified
     float worst = std::max(length / width, width / length);
     float w2 = length * length;
     while (beg != end) {
-      if (filter_(*beg))
+      if (this->filter_(*beg))
 	continue;
-      float area = infovis::get(weight_,*beg) * scale;
+      float area = infovis::get(this->weight_,*beg) * scale;
       if (area == 0) {
 	beg++;
 	continue;
