@@ -29,7 +29,7 @@
 #include <infovis/tree/treemap/squarified.hpp>
 #include <infovis/tree/treemap/drawing/gl_cs_drawer.hpp>
 #include <infovis/tree/treemap/drawing/debug_drawer.hpp>
-#include <boost/directory.h>
+#include <filesystem>
 #include <iostream>
 #include <cmath>
 
@@ -49,15 +49,26 @@ static void build_tree(tree_traits< vector_as_tree >::node_descriptor parent,
 		       std::vector<std::string,gc_alloc<std::string> >& names,
 		       WeightMap& wm)
 {
-  using namespace infovis::filesystem;
-  for (dir_it it(dirname); it != dir_it(); ++it) {
-    if ((*it)[0] == '.')
-      continue;
-    tree_traits< vector_as_tree >::node_descriptor n = add_node(parent, tree);
-    names.push_back(*it);
-    wm.push_back(boost::filesystem::get<size>(it));
-    if (boost::filesystem::get<is_directory>(it))
-      build_tree(n, tree, dirname+"/"+(*it), names, wm);
+  // C++17 std::filesystem modernization
+  try {
+    for (const auto& entry : std::filesystem::directory_iterator(dirname)) {
+      const auto filename = entry.path().filename().string();
+      if (filename[0] == '.')
+        continue;
+      
+      auto n = add_node(parent, tree);
+      names.push_back(filename);
+      
+      // Get file size, defaulting to 0 for directories or on error
+      std::error_code ec;
+      auto size = entry.is_regular_file(ec) ? std::filesystem::file_size(entry, ec) : 0;
+      wm.push_back(static_cast<float>(ec ? 0 : size));
+      
+      if (entry.is_directory(ec) && !ec)
+        build_tree(n, tree, entry.path().string(), names, wm);
+    }
+  } catch (const std::filesystem::filesystem_error&) {
+    // Directory iteration failed, continue silently
   }
 }
 
