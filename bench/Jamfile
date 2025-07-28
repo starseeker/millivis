@@ -1,0 +1,7 @@
+SubDir TOP bench ;
+
+Main raw_filter : raw_filter.cpp ;
+Main raw_disp_rect : raw_disp_rect.cpp ;
+# LinkLibraries raw_disp_rect : liblite ;
+Main disp_lines : disp_lines.cpp ;
+LinkLibraries disp_lines : libtree liblite ;

@@ -1,0 +1,15 @@
+SubDir TOP infovis table ;
+
+SOURCES =
+	column
+	table
+	metadata
+	csv_loader
+	;
+
+Library libtree : $(SOURCES).cpp ;
+
+Main test_column : test_column.cpp ;
+LinkLibraries test_column : libtree ;
+Main test_table : test_table.cpp ;
+LinkLibraries test_table : libtree ;

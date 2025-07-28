@@ -1,0 +1,5 @@
+SubDir TOP infovis tree treemap ;
+
+# Main test_treemap : test_treemap.cpp ;
+
+SubInclude TOP infovis tree treemap drawing ;

@@ -1,0 +1,10 @@
+SubDir TOP infovis drawing notifiers ;
+
+SOURCES =
+	BeginEnd
+	BoundedRange
+	Change
+	;
+
+Library liblite : $(SOURCES).cpp ;
+

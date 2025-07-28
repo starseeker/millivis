@@ -1,0 +1,24 @@
+SubDir TOP infovis drawing inter ;
+
+SOURCES =
+	Interactor
+	Interactor3States
+	InteractorEnterLeave
+	InteractorIdle
+#	InterMove
+	KeyCodeInteractor
+	InteractorManager
+	Manager3State
+	ManagerEnterLeave
+	ManagerIdle
+	DefaultManagerIdle
+	Field
+	EventCodes
+	MouseHandler
+	KeyboardHandler
+	TimerHandler
+	SysHandlers
+	;
+
+Library liblite : $(SOURCES).cpp ;
+

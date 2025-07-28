@@ -1,0 +1,33 @@
+SubDir TOP infovis drawing ;
+
+Main test_box : test_box.cpp ;
+Main test_point_vec : test_point_vec.cpp ;
+# Main test_color : test_color.cpp ;
+
+SOURCES =
+	drawing
+	Font
+	FontGlut
+	FontWin32
+	FontFT
+	Image
+	ImagePNG
+	SaveUnder
+	Texture
+	Transform
+	Animate
+	AnimateBoxList
+	AnimateCompose
+	AnimateInverse
+	;
+
+Library liblite : $(SOURCES).cpp ;
+Main test_lite : test_lite.cpp ;
+Main test_lite_pick : test_lite_pick.cpp ;
+Main test_font : test_font.cpp ;
+
+SubInclude TOP infovis drawing colors ;
+SubInclude TOP infovis drawing lite ;
+SubInclude TOP infovis drawing inter ;
+SubInclude TOP infovis drawing notifiers ;
+

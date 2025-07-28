@@ -1,0 +1,9 @@
+SubDir TOP geometric ;
+
+SOURCES =
+#	test_geometric
+	;
+
+Main test_geometric : $(SOURCES).cpp ;
+LinkLibraries test_geometric : liblite libtree ;
+

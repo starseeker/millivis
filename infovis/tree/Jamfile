@@ -1,0 +1,29 @@
+SubDir TOP infovis tree ;
+
+SOURCES =
+	tree
+	dir_tree
+	xml_tree
+	xmltree_tree
+	export_tree_xml
+	dir_property_tree
+	xml_property_tree
+	ObservableTree
+	;
+
+Library libtree : $(SOURCES).cpp ;
+
+Main test_vector_as_tree : test_vector_as_tree.cpp ;
+Main test_sum_weight_visitor : test_sum_weight_visitor.cpp ;
+Main test_property_tree : test_property_tree.cpp ;
+Main test_copy : test_copy.cpp ;
+Main test_bfs_visitor : test_bfs_visitor.cpp ;
+Main test_tree : test_tree.cpp ;
+Main test_dir_tree : test_dir_tree.cpp ;
+LinkLibraries test_dir_tree : libtree ;
+Main test_xml_tree : test_xml_tree.cpp ;
+LinkLibraries test_xml_tree : libtree ;
+
+SubInclude TOP infovis tree treemap ;
+#SubInclude TOP infovis tree drawing ;
+

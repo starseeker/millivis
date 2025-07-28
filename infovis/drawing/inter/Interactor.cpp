@@ -1,0 +1,71 @@
+/* -*- C++ -*-
+ *
+ * Copyright (C) 2016 Jean-Daniel Fekete
+ * 
+ * This file is part of MillionVis.
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+#include <infovis/drawing/inter/Interactor.hpp>
+
+namespace infovis {
+
+Interactor::~Interactor() { }
+
+bool
+Interactor::activate(const Event& ev)
+{
+  if (state_ == state_active) return false;
+  state_ = state_active;
+  bool ret = doActivate(ev);
+  return ret;
+}
+
+void
+Interactor::desactivate(const Event& ev)
+{
+  if (state_ != state_active) return;
+  state_ = state_inactive;
+  doDesactivate(ev);
+}
+
+void
+Interactor::abort(const Event& ev)
+{
+  if (state_ != state_active) return;
+  state_ = state_inactive;
+  doAbort(ev);
+}
+
+bool
+Interactor::doActivate(const Event&) { return true; }
+
+void
+Interactor::doDesactivate(const Event&) { }
+
+void
+Interactor::doAbort(const Event&) { }
+
+bool
+Interactor::isA(const string& n) const
+{
+  return n == getInteractorName();
+}
+
+} // namespace infovis

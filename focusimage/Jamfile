@@ -1,0 +1,9 @@
+SubDir TOP focusimage ;
+
+SOURCES =
+	focusimage
+	;
+
+Main focusimage : $(SOURCES).cpp ;
+LinkLibraries focusimage : liblite libtree ;
+

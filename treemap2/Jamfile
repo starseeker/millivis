@@ -1,0 +1,30 @@
+SubDir TOP treemap2 ;
+
+SOURCES =
+	FileType
+	Properties
+	ControlsTab
+	LitePath
+	LiteTreemap
+#	LiteScatterPlot
+	LayoutVisu
+	LayoutVisuSQ
+	LayoutVisuSD
+	LayoutVisuSP
+	LiteSpeed
+	treemap2
+#	nv_3d_drawer
+	FastDrawer
+	FastPicker
+	ColorRamp
+	Recorder
+	BarGraph
+	LiteRangeSliderGraph
+	AnimateTree
+#	DynaQueries
+	LabelTreemap
+	;
+
+Main treemap2 : $(SOURCES).cpp ;
+LinkLibraries treemap2 : liblite libtree ;
+

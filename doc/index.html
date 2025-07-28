@@ -1,0 +1,346 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta name="generator" content="HTML Tidy, see www.w3.org">
+<title>Treemap2 User's Guide</title>
+<meta name="author" content="Jean-Daniel Fekete">
+</head>
+<body>
+<h1>Treemap2 User's Guide</h1>
+
+<h2>Jean-Daniel Fekete</h2>
+
+<h3>June 17 2002</h3>
+
+<p>Treemap2 is a high performance information visualization program
+that visualizes your data using either treemaps or scatter plots on
+accelerated graphics cards using OpenGL.</p>
+
+<h2>Table of Contents</h2>
+
+<ul>
+<li><a href="#Download">Download</a></li>
+
+<li><a href="#Installation">Installation</a></li>
+
+<li><a href="#Starting_the_program">Starting the program</a></li>
+
+<li><a href="#Navigation">Navigation</a></li>
+
+<li><a href="#Menus">Menus</a></li>
+
+<li><a href="#Exiting">Exiting</a></li>
+
+<li><a href="#Tweaking"">Tweaking</a></li>
+
+<li><a href="#Problems">Problems</a></li>
+</ul>
+
+<h2><a name="Download"></a>Download</h2>
+
+<p>You can get the program at the following location: <a href=
+"http://www.cs.umd.edu/hcil/millionvis/download/millionvis.zip">http://www.cs.umd.edu/hcil/millionvis/download/millionvis.zip</a></p>
+
+<p>The sources are also available under the Gnu Public Licence
+(GPL) at the following location: <a href=
+"millionvis-src.zip">millionvis-src.zip</a></p>
+
+<h2><a name="Installation"></a>Installation</h2>
+
+<p>The distribution can be unzipped anywhere. &nbsp;The program has
+to be started from the directory since it uses some of its
+files.</p>
+
+<h2><a name="Starting_the_program"></a>Starting the program</h2>
+
+<p>The treemap2 program is started from a command prompt in Windows
+or a shell prompt in Unix or Linux.</p>
+
+<p>Starting it without arguments will show the current directory
+and subdirectories as a treemap.</p>
+
+<p>If provided an argument, the treemap2 program will first try to
+load a file of that name as an XML file. &nbsp;If it cannot be
+found or is not an XML file, the program will try to load it as a
+directory.</p>
+
+<p>By default, the program takes the entire screen. &nbsp;Starting
+it with the "-f" option will make it smaller and resizeeable.</p>
+
+<img src="treemap2.jpg" alt="Screen Image" width="728" height="507"> 
+
+<h3>Loading an XML file</h3>
+
+<p>To load an XML file called "dir.xml", just type:<br>
+ treemap2 dir.xml</p>
+
+<p>It can also be compressed with gzip or compress and be called
+"dir.xml.gz" or "dir.xml.Z", the program will still read it
+with:<br>
+ treemap2 dir.xml.gz</p>
+
+<p>Compressing an XML file using the gzip program will provide an
+important compression rate and a faster loading.</p>
+
+<h3>Loading a directory</h3>
+
+<p>To load the root directory of disk C on Windows, just type:<br>
+ treemap2 c:/</p>
+
+<p>The command will read all the files in the C: disk and, after a
+amount of time depending on the number of files on the disk, il
+will show the entire disk on the screen as a treemap.</p>
+
+<h2><a name="Navigation"></a>Navigation</h2>
+
+<p>Once a treemap is displayed, navigating is done with the mouse
+and the shift key.</p>
+
+<p>At startup time, the only displayed labels are names of the
+items at the first level of the displayed hierarchy.</p>
+
+<p>For example, if you loaded the current directory and it contains
+three subdirectories: A, B and C, only these three labels will be
+visible, each at the center of their respective rectangles.</p>
+
+<p>When loading from an XML file, only the "root" directory is
+visible so one label is displayed at the center of the screen.</p>
+
+<p>When moving the mouse, the path under the pointer is displayed
+at the top of the screen.</p>
+
+<p>When stoping to move for a second, the labels change. &nbsp;They
+display the names of the elements of the hierarchy. &nbsp;This is a
+dynamic labeling.</p>
+
+<p>When moving slowly, this display remains and follows the
+pointer. &nbsp;When moving quickly, the dynamic labeling disappears
+and the first-level labels come back.</p>
+
+<p>Clicking on a label dynamic label zooms its to full screen.
+&nbsp;When pressing the shift key, the dynamic labels and the path
+on top of the screen are frozen. &nbsp;Clicking on either of them
+will zoom in or out. &nbsp;As a conveninence, clicking on the top
+bar outside of the path will zoom back to the root.</p>
+
+<h2><a name="Menus"></a>Menus</h2>
+
+<p>To display menus, click with the right button. &nbsp;It will
+display a tabbed pane with two menus, one for configuring the
+visualization and the other one to perform dynamic queries.</p>
+
+<p>The menus disappear when the mouse in not over them, leaving
+only an outline. &nbsp;Clicking right another time will remove it
+completely.</p>
+
+<h3>Configuring the Visualization</h3>
+
+<img src="controls.jpg" alt="Visualization Controls" width="728"
+height="507"> 
+
+<p>The menu items have the following meaning:</p>
+
+<dl>
+<dt>Layout</dt>
+
+<dd>
+<p>Choose among <i>Squarified</i> treemap, <i>Strip</i> treemap,
+<i>slice and dice</i> treemap or <i>scatter plot</i>.</p>
+</dd>
+
+<dt>Size Attribute</dt>
+
+<dd>
+<p>Chose the attribute mapped to rectangle size</p>
+</dd>
+
+<dt>Color Attribute</dt>
+
+<dd>
+<p>Chose the attribute mapped to rectangle color</p>
+</dd>
+
+<dt>Color Range</dt>
+
+<dd>
+<p>Chose the range of colors used for visualization inside the
+total range of colors.</p>
+</dd>
+
+<dt>Color Ramp</dt>
+
+<dd>
+<p>Choose whether colors are categorical or sequential. &nbsp;Two
+color schemes are provided for both.</p>
+</dd>
+
+<dt>Y Attribute</dt>
+
+<dd>
+<p>Chose the attribute mapped to the Y position for scatter
+plots</p>
+</dd>
+
+<dt>X Attribute</dt>
+
+<dd>
+<p>Chose the attribute mapped to the X position for scatter
+plots</p>
+</dd>
+
+<dt>Plot Range</dt>
+
+<dd>
+<p>For scatter plots, chose the smaller and larger size of
+rectangles</p>
+</dd>
+
+<dt>Sort By</dt>
+
+<dd>
+<p>For treemaps, choose the sorting order.</p>
+</dd>
+
+<dt>Transparency</dt>
+
+<dd>
+<p>For scatter plots, chose a transparency level so that overlaped
+items will still remain visible
+</p>
+</dd>
+
+<dt>Blend Sizes</dt>
+
+<dd>
+<p>For scatter plots, change the sizes by blending the previously
+assiogned size with the currently assigned size
+</p>
+</dd>
+
+<dt>Border Thickness</dt>
+
+<dd>
+<p>For scatter plots, change the border thicknesses for
+directories
+</p>
+</dd>
+
+<dt>Label All</dt>
+
+<dd>
+<p>For scatter plots, show all the labels at the first hierachy
+level, whether directories of files
+</p>
+</dd>
+
+<dt>Replay</dt>
+
+<dd>
+<p>Don't use it now</p>
+</dd>
+</dl>
+
+<h3>Performing Dynamic Queries</h3>
+
+<img src="queries.jpg" alt="Dynamic queries menu" width="728"
+height="507">
+ 
+
+<h2><a name="Exiting"></a>Exiting</h2>
+
+<p>Just hit the "Esc" key.</p>
+
+<h2><a name="Tweaking"></a>Tweaking</h2>
+
+<p>treemap2 uses two files for its configuration: "file_types.txt" and
+".properties".  These two files can be modified for specific
+purposes.</p>
+
+    <h3>File Types</h3>
+
+<p>The file "file_types.txt" contains the mapping between file
+extensions and their associated category, usually mapped with a color
+in treemap2. The standard file contains the following rules:</p>
+
+<listing>
+gz	1
+Z	1
+z	1
+
+arj	2
+zip	2
+tar	2
+...
+xls	3
+bin	3
+...
+afm	4
+bmp	4
+...
+1	5
+2	5
+...
+pdf	5
+...
+mpeg	6
+mpg	6
+...
+vrml	7
+wrl	7
+...
+Jamrules	8
+Makefile	8
+...
+</listing>
+
+<p>This mapping reads: file ending with .gz etc are of category 1,
+files ending with .arj are of category 2, etc.  Actually, category 1
+is a bit special since it means "compressed" and is removed from the
+file name to recompute the file type.</p>
+
+<p>The default file is meant to map standard file types to 8
+categories, roughly archives (2), binary (3), images (4), text (5),
+multimedia (6), 3D scenes (7), programming (8). </p>
+
+<p>To visualize a more specific directory, this file can be changed.
+For instance, for visualizing the linux kernel source tree, the
+mapping is <a href="file_types_kernel.txt">available there</a>.</p>
+
+    <h3>Properies File</h3>
+
+<p>The file ".properies" contains the default settings for fonts and
+font sizes.  These sizes are "resolution independent" so in a high
+resolution monitor, the size will be still readable (if the screen
+resolution is correctly declared to the sytstem).  You can change it
+too.</p>
+
+<listing>
+label.font.name		Arial
+label.font.style	plain
+label.font.size		10
+
+monitor.label.font.name		Arial
+monitor.label.font.style	plain
+monitor.label.font.size		9
+
+menu.label.font.name		Arial
+menu.label.font.style		plain
+menu.label.font.size		10
+</listing>
+
+<h2><a name="Problems"></a>Problems</h2>
+
+<p>Sometimes, the program hungs for a few seconds. &nbsp;This is
+due to the "garbage collector", i.e. the program reclaims memory
+that is not used any more.</p>
+<p> Depending on the actual machine you are using, it may take from a
+few seconds to thirty seconds. &nbsp;Don't do anything. Let it
+finish.</p>
+<p> This program is a research prototype and should be considers as
+such. &nbsp;Don't hesitate to report bugs, problems and other
+thoughts to Jean-Daniel Fekete at <a href=
+"mailto:fekete@cs.umd.edu">fekete@cs.umd.edu</a></p>
+
+</body>
+</html>
+
