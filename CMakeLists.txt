@@ -28,6 +28,7 @@ add_subdirectory(treemap2)
 find_package(PNG REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(Freetype REQUIRED)
+find_package(EXPAT REQUIRED)
 
 # Assuming OpenGL and GLUT are present for now
 find_package(OpenGL REQUIRED)
@@ -38,6 +39,7 @@ include_directories(
     ${PNG_INCLUDE_DIRS}
     ${ZLIB_INCLUDE_DIRS}
     ${Freetype_INCLUDE_DIRS}
+    ${EXPAT_INCLUDE_DIRS}
     ${OPENGL_INCLUDE_DIR}
     ${GLUT_INCLUDE_DIR}
     # Add others as needed
@@ -48,6 +50,7 @@ set(MILLIONVIS_LIBS
     ${PNG_LIBRARIES}
     ${ZLIB_LIBRARIES}
     ${Freetype_LIBRARIES}
+    ${EXPAT_LIBRARIES}
     ${OPENGL_LIBRARIES}
     ${GLUT_LIBRARIES}
     # Add others as needed

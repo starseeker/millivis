@@ -30,60 +30,64 @@
 
 namespace infovis {
 
+/**
+ * Debug wrapper for treemap drawers
+ * 
+ * This template wraps any drawer implementation with debug state checking to
+ * ensure proper calling sequence during treemap rendering. In debug builds,
+ * it validates that drawer methods are called in the correct order.
+ */
 template <class Tree, class Box, class Drawer>
 struct debug_drawer : public Drawer
 {
-  enum State {
-    drawer_inited,
-    drawer_started,
-    drawer_visiting,
-    drawer_finished
+  enum class State {
+    inited,
+    started,
+    visiting,
+    finished
   };
+  
 #ifndef NDEBUG
-  State state;
+  State state = State::inited;
 #endif
 
   debug_drawer() : Drawer() {
 #ifndef NDEBUG
-    state = drawer_inited;
+    state = State::inited;
 #endif
   }
-  debug_drawer(const Drawer& d) : Drawer(d) {
+  
+  explicit debug_drawer(const Drawer& d) : Drawer(d) {
 #ifndef NDEBUG
-    state = drawer_inited;
+    state = State::inited;
 #endif
   }
   
   void start() {
 #ifndef NDEBUG
-    if (state != drawer_inited &&
-	state != drawer_finished) {
+    if (state != State::inited && state != State::finished) {
       std::cerr << "Incorrect state in Drawer::start\n";
     }
-    state = drawer_started;
+    state = State::started;
 #endif
     Drawer::start();
   }
   void finish() {
 #ifndef NDEBUG
-    if (state != drawer_started &&
-	state != drawer_visiting) {
+    if (state != State::started && state != State::visiting) {
       std::cerr << "Incorrect state in Drawer::finish\n";
     }
-    state = drawer_finished;
+    state = State::finished;
 #endif
     Drawer::finish();
   }
 
-  bool begin_box(const Box& b,
-		 typename tree_traits<Tree>::node_descriptor n,
-		 unsigned depth) {
+  bool begin_box(const Box& b, typename tree_traits<Tree>::node_descriptor n, unsigned depth) {
 #ifndef NDEBUG
-    if (state != drawer_started &&
-	state != drawer_visiting) {
+    if (state != State::started && state != State::visiting) {
       std::cerr << "Incorrect state in Drawer::begin_box\n";
     }
-    state = drawer_visiting;
+    state = State::visiting;
 #endif
     return Drawer::begin_box(b, n, depth);
   }
