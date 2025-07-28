@@ -55,7 +55,3 @@ set(MILLIONVIS_LIBS
     ${GLUT_LIBRARIES}
     # Add others as needed
 )
-
-# Debug: Print what EXPAT found
-message(STATUS "EXPAT_LIBRARIES: ${EXPAT_LIBRARIES}")
-message(STATUS "EXPAT_INCLUDE_DIRS: ${EXPAT_INCLUDE_DIRS}")

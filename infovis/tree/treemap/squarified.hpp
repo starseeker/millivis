@@ -51,7 +51,24 @@ struct treemap_chose_orient {
 };
 
 /**
- * Squarified treemap class
+ * Squarified treemap algorithm implementation
+ * 
+ * This class implements the squarified treemap algorithm by Bruls, Huizing, and van Wijk.
+ * The algorithm aims to create rectangular subdivisions where the aspect ratios are as 
+ * close to 1:1 (square) as possible, making the visualization easier to read.
+ * 
+ * The squarified algorithm works by:
+ * 1. Sorting children by weight (descending)
+ * 2. Building rows/columns of rectangles that maintain good aspect ratios
+ * 3. Alternating between horizontal and vertical subdivision based on available space
+ * 
+ * Template parameters:
+ * - Tree: Tree data structure type
+ * - Box: Bounding box type for layout
+ * - WeightMap: Property map providing node weights
+ * - Drawer: Drawing/rendering interface (default: null_drawer)
+ * - Orient: Orientation policy (default: treemap_chose_orient)
+ * - Filter: Node filtering policy (default: filter_none)
  */
 template <class Tree,
 	  class Box,
@@ -103,10 +120,9 @@ struct treemap_squarified
     const float tw = infovis::get(this->weight_,n);
     unsigned ret = 1;
 
-    children_iterator i, end;
-    // TODO: Replaced boost::tie with std::tie - C++17 modernization
-    std::tie(i,end) = children(n, this->tree_);
-    float scale = width(b) * height(b) / tw;
+    // C++17 structured bindings instead of std::tie
+    auto [i, end] = children(n, this->tree_);
+    const float scale = width(b) * height(b) / tw;
     if (scale == 0) {
 #if 0
       while (i != end) {
@@ -128,14 +144,14 @@ struct treemap_squarified
 	float width;
 
 	this->drawer_.begin_strip(b, n, depth, bottom_to_top);
-	children_iterator e = squarify(i, end, w, scale, width);
+	auto e = squarify(i, end, w, scale, width);
 	if (width == 0) {
 	  // can happen if all the remaining children have a weight==0
 	  i = e;
 	}
 	for (; i != e; i++) {
-	  node_descriptor child = *i;
-	  float nw = infovis::get(this->weight_,child) * scale / width;
+	  const auto child = *i;
+	  const float nw = infovis::get(this->weight_,child) * scale / width;
 	  ret += visit(box_type(xmin(b),y,xmin(b)+width,y+nw),
 		       child, depth+1);
 	  y += nw;
@@ -148,14 +164,14 @@ struct treemap_squarified
 	float x = xmin(b);
 	float width;
 	this->drawer_.begin_strip(b, n, depth, left_to_right);
-	children_iterator e = squarify(i, end, w, scale, width);
+	auto e = squarify(i, end, w, scale, width);
 	if (width == 0) {
 	  // can happen if all the remaining children have a weight==0
 	  i = e;
 	}
 	for (; i != e; i++) {
-	  node_descriptor child = *i;
-	  float nw = infovis::get(this->weight_,child) * scale / width;
+	  const auto child = *i;
+	  const float nw = infovis::get(this->weight_,child) * scale / width;
 	  ret += visit(box_type(x, ymin(b), x+nw, ymin(b)+width),
 		       child, depth+1);
 	  x += nw;

@@ -37,7 +37,22 @@
 namespace infovis {
 
 /**
- * Implementation of the slice and dice treemap algorithm
+ * Slice and dice treemap algorithm implementation
+ * 
+ * This class implements the classic slice and dice treemap algorithm, one of the earliest
+ * treemap layouts. The algorithm recursively subdivides the space by alternating between
+ * horizontal slicing (dividing top-to-bottom) and vertical dicing (dividing left-to-right).
+ * 
+ * The slice and dice algorithm:
+ * 1. Determines subdivision direction based on current depth or orientation policy
+ * 2. Divides available space proportionally among children based on their weights
+ * 3. Recursively applies layout to each child with opposite orientation
+ * 
+ * While simple and efficient, this algorithm can produce rectangles with extreme aspect
+ * ratios, especially for unbalanced trees. Consider using the squarified algorithm for
+ * better visual results.
+ * 
+ * Template parameters are the same as treemap_squarified.
  */
 template <class Tree, 
 	  class Box,
@@ -91,13 +106,13 @@ struct treemap_slice_and_dice :
 	  this->drawer_.draw_box(Box(xmin(b),ymin(b),x,ymax(b)), n, depth);
 	}
 #endif
-	children_iterator i,end;
-	for (std::tie(i,end) = children(n,this->tree_); i != end; i++) {
-	  node_descriptor child = *i;
+	// C++17 structured bindings 
+	for (auto [i, end] = children(n,this->tree_); i != end; i++) {
+	  const auto child = *i;
 	  if (this->filter_(child))
 	    continue;
-	  float nw = w * infovis::get(this->weight_, child) / tw;
-	  float e = /*(i == (end-1)) ? xmax(b) : */coord_type(x+nw);
+	  const float nw = w * infovis::get(this->weight_, child) / tw;
+	  const float e = /*(i == (end-1)) ? xmax(b) : */coord_type(x+nw);
 	  ret += visit(flip(dir),
 		       Box(x,ymin(b),e,ymax(b)),
 		       child, depth+1);
@@ -118,13 +133,13 @@ struct treemap_slice_and_dice :
 	  this->drawer_.draw_box(Box(xmin(b),ymin(b),xmax(b),y), n, depth);
 	}
 #endif
-	children_iterator i,end;
-	for (std::tie(i,end) = children(n,this->tree_); i != end; i++) {
-	  node_descriptor child = *i;
+	// C++17 structured bindings
+	for (auto [i, end] = children(n,this->tree_); i != end; i++) {
+	  const auto child = *i;
 	  if (this->filter_(child))
 	    continue;
-	  float nh = h * infovis::get(this->weight_, child) / tw;
-	  float e = /* (i == (end-1)) ? ymax(b) : */coord_type(y+nh);
+	  const float nh = h * infovis::get(this->weight_, child) / tw;
+	  const float e = /* (i == (end-1)) ? ymax(b) : */coord_type(y+nh);
 	  ret += visit(flip(dir),
 		       Box(xmin(b),y,xmax(b),e), child, depth+1);
 	  y += nh;
