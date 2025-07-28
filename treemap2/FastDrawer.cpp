@@ -35,7 +35,7 @@
 #include <glh_glut.h>
 #endif
 
-#include <gl/glext.h>
+#include <GL/glext.h>
 
 namespace infovis {
 

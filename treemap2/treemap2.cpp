@@ -57,6 +57,7 @@
 #include <cmath>
 #include <cfloat>
 #include <cstdlib>
+#include <tuple>
 #include <iostream>
 #ifdef WIN32
 #define isnan _isnan
@@ -317,8 +318,8 @@ struct log_fn {
   const WeightMap& wm;
   log_fn(const WeightMap& w) : wm(w) { }
   float operator()(int i) const {
-    double d = log(wm[i]+1.0);
-    if (isnan(d)) {
+    double d = std::log(wm[i]+1.0);
+    if (std::isnan(d)) {
       std::cerr << "got a nan for wm[" << i << "] = " << wm[i] << std::endl;
       return 0;
     }
@@ -338,8 +339,8 @@ struct sqrt_fn {
   const WeightMap& wm;
   sqrt_fn(const WeightMap& w) : wm(w) { }
   float operator()(node_descriptor n) const {
-    double d = sqrt(wm[n]);
-    if (isnan(d)) {
+    double d = std::sqrt(wm[n]);
+    if (std::isnan(d)) {
       std::cerr << "got a nan for wm[" << n << "] = " << wm[n] << std::endl;
       return 0;
     }
@@ -419,7 +420,7 @@ static bool is_sum_weights(node_descriptor n,
     return true;
   float sum = 0;
   Tree::children_iterator i, e;
-  boost::tie(i, e) = children(n, t);
+  std::tie(i, e) = children(n, t);
   while (i != e) {
     if (! is_sum_weights(*i, t, c))
       return false;
