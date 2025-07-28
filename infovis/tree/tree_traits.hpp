@@ -32,8 +32,9 @@
 #define INFOVIS_TREE_TRAITS_HPP
 
 #include <infovis/alloc.hpp>
-#include <boost/config.hpp>
-#include <boost/tuple/tuple.hpp>
+// TODO: Removed unused boost includes - C++17 modernization  
+// #include <boost/config.hpp>
+// #include <boost/tuple/tuple.hpp>
 
 namespace infovis {
 

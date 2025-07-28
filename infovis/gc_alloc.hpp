@@ -40,6 +40,25 @@ struct gc_cleanup : virtual public gc {};
 template <class T, bool Atomic = false>
 class gc_alloc : public std::allocator<T>
 {
+public:
+  // TODO: Added C++17 allocator requirements for modernization
+  using value_type = T;
+  using pointer = T*;
+  using const_pointer = const T*;
+  using reference = T&;
+  using const_reference = const T&;
+  using size_type = std::size_t;
+  using difference_type = std::ptrdiff_t;
+  
+  template<class U>
+  struct rebind {
+    using other = gc_alloc<U, Atomic>;
+  };
+  
+  gc_alloc() = default;
+  
+  template<class U>
+  gc_alloc(const gc_alloc<U, Atomic>&) {}
 };
 
 enum GCPlacement {UseGC,

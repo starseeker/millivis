@@ -24,7 +24,7 @@
  */
 #include <infovis/table/table.hpp>
 #include <infovis/table/column.hpp>
-#include <boost/config.hpp>
+// TODO: Removed unused boost/config.hpp - C++17 modernization
 #include <stdexcept>
 #include <algorithm>
 #undef min
