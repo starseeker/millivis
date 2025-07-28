@@ -224,7 +224,7 @@ template <int Dim, class Coord>
 inline Coord norm2(const vector_<Dim, Coord>& ve)
 {
   Coord c = 0;
-  CFOREACH { c += v[i]*v[i]; }
+  CFOREACH { c += ve[i]*ve[i]; }
   return c;
 }
 

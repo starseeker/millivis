@@ -76,7 +76,8 @@ ImagePNG::Loader::load(const std::string& name)
 			    (png_infopp)NULL);
     return 0;
   }
-  if (setjmp(png_ptr->jmpbuf)) {
+  // TODO: Fixed deprecated PNG jmpbuf access for modern libpng - C++17 modernization
+  if (setjmp(png_jmpbuf(png_ptr))) {
     png_destroy_read_struct(&png_ptr, &info_ptr,
 			    &end_info);
     return 0;

@@ -27,6 +27,7 @@
 
 #include <infovis/drawing/drawing.hpp>
 #include <vector>
+#include <cstring> // TODO: Added for memset/memcpy - C++17 modernization
 
 namespace infovis {
 

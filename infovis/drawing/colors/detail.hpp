@@ -26,6 +26,7 @@
 #define INFOVIS_DRAWING_COLORS_DETAILS_HPP
 
 #include <limits>
+#include <type_traits>
 
 namespace infovis {
 
@@ -45,8 +46,8 @@ inline T one(const T&, float&)
 template <class T>
 inline T one(const T& t)
 {
-  typename boost::detail::if_true<(std::numeric_limits<T>::is_integer)>
-    ::template then<int,float>::type int_or_float;
+  // TODO: Replace boost::detail::if_true with C++17 std::conditional - modernization
+  typename std::conditional<std::numeric_limits<T>::is_integer, int, float>::type int_or_float;
   return one(t, int_or_float);
 }
 
@@ -78,10 +79,9 @@ inline void convert(S& s, float&, const T& t, float)
 template <class S, class T>
 inline void convert(S& s, const T& t)
 {
-  typename boost::detail::if_true<(std::numeric_limits<S>::is_integer)>
-    ::template then<int,float>::type int_or_float1(0);
-  typename boost::detail::if_true<(std::numeric_limits<T>::is_integer)>
-    ::template then<int,float>::type int_or_float2(0);
+  // TODO: Replace boost::detail::if_true with C++17 std::conditional - modernization
+  typename std::conditional<std::numeric_limits<S>::is_integer, int, float>::type int_or_float1(0);
+  typename std::conditional<std::numeric_limits<T>::is_integer, int, float>::type int_or_float2(0);
   convert(s, int_or_float1, t, int_or_float2);
 }
 
