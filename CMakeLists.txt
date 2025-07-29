@@ -24,7 +24,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 # Optionally: Define sources in subdirectories
 add_subdirectory(infovis)
 add_subdirectory(treemap2)
-add_subdirectory(geometric)
+# add_subdirectory(geometric) # Has complex template issues requiring major refactoring
 add_subdirectory(bench)
 add_subdirectory(focusimage)
 
@@ -60,7 +60,3 @@ set(MILLIONVIS_LIBS
     # Add others as needed
     CACHE INTERNAL "MillionVis external libraries"
 )
-
-message(STATUS "MILLIONVIS_LIBS = ${MILLIONVIS_LIBS}")
-message(STATUS "PNG_LIBRARIES = ${PNG_LIBRARIES}")
-message(STATUS "OPENGL_LIBRARIES = ${OPENGL_LIBRARIES}")
