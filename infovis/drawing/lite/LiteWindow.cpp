@@ -32,7 +32,8 @@
 #include <infovis/drawing/inter/TimerHandler.hpp>
 #include <infovis/drawing/inter/SysHandlers.hpp>
 #include <infovis/drawing/inter/DefaultManagerIdle.hpp>
-#include <GL/glut.h>
+#include <GLFW/glfw3.h>
+#include <GL/glu.h>
 #include <set>
 //#define PRINT
 //#ifdef PRINT
@@ -57,18 +58,100 @@
 namespace infovis {
 
 LiteWindow * LiteWindow::instance;
+static GLFWwindow* window = nullptr;
 static string save_fname;
 static int save_frame;
 static float time_divisor = 1.0f;
 static int time_shift = 0;
 static int cursor_x, cursor_y;
 
+// GLFW callback functions
+static void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+  LiteWindow* instance = static_cast<LiteWindow*>(glfwGetWindowUserPointer(window));
+  if (instance) {
+    instance->do_reshape(width, height);
+  }
+}
+
+static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+  LiteWindow* instance = static_cast<LiteWindow*>(glfwGetWindowUserPointer(window));
+  if (instance) {
+    double xpos, ypos;
+    glfwGetCursorPos(window, &xpos, &ypos);
+    
+    if (action == GLFW_PRESS || action == GLFW_REPEAT) {
+      instance->doKeyboard(instance->glfw_to_keycode(key), true, int(xpos), int(ypos));
+    } else if (action == GLFW_RELEASE) {
+      instance->doKeyboard(instance->glfw_to_keycode(key), false, int(xpos), int(ypos));
+    }
+  }
+}
+
+static void char_callback(GLFWwindow* window, unsigned int codepoint) {
+  LiteWindow* instance = static_cast<LiteWindow*>(glfwGetWindowUserPointer(window));
+  if (instance) {
+    double xpos, ypos;
+    glfwGetCursorPos(window, &xpos, &ypos);
+    int height;
+    glfwGetFramebufferSize(window, nullptr, &height);
+    instance->doKeyboard(codepoint, true, int(xpos), height - int(ypos));
+  }
+}
+
+static void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
+  LiteWindow* instance = static_cast<LiteWindow*>(glfwGetWindowUserPointer(window));
+  if (instance) {
+    double xpos, ypos;
+    glfwGetCursorPos(window, &xpos, &ypos);
+    int height;
+    glfwGetFramebufferSize(window, nullptr, &height);
+    cursor_x = int(xpos);
+    cursor_y = height - int(ypos);
+    instance->doMouse(button, action == GLFW_PRESS, cursor_x, cursor_y);
+  }
+}
+
+static void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos) {
+  LiteWindow* instance = static_cast<LiteWindow*>(glfwGetWindowUserPointer(window));
+  if (instance) {
+    int height;
+    glfwGetFramebufferSize(window, nullptr, &height);
+    cursor_x = int(xpos);
+    cursor_y = height - int(ypos);
+    
+    // Check if any mouse button is pressed
+    bool any_pressed = false;
+    for (int button = GLFW_MOUSE_BUTTON_1; button <= GLFW_MOUSE_BUTTON_8; button++) {
+      if (glfwGetMouseButton(window, button) == GLFW_PRESS) {
+        any_pressed = true;
+        break;
+      }
+    }
+    
+    if (any_pressed) {
+      instance->doMotion(cursor_x, cursor_y);
+    } else {
+      instance->doPassiveMotion(cursor_x, cursor_y);
+    }
+  }
+}
+
+static void window_iconify_callback(GLFWwindow* window, int iconified) {
+  LiteWindow* instance = static_cast<LiteWindow*>(glfwGetWindowUserPointer(window));
+  if (instance) {
+    instance->doVisible(!iconified);
+  }
+}
+
 void
 LiteWindow::init(int& argc, char **argv)
 {
   static bool inited;
   if (! inited) {
-    glutInit(&argc, argv);
+    if (!glfwInit()) {
+      std::cerr << "Failed to initialize GLFW" << std::endl;
+      exit(EXIT_FAILURE);
+    }
     inited = true;
   }
 }
@@ -82,23 +165,39 @@ LiteWindow::LiteWindow(const string& name, const Box& box, unsigned int cap)
     redisplay_count_(0),
     modifiers_(0)
 {
-  glutInitDisplayMode(cap);
-  glutInitWindowPosition(int(xmin(box)), int(ymin(box)));
-  glutInitWindowSize(int(width(box)), int(height(box)));
-  win = glutCreateWindow(name.c_str());
+  // Configure GLFW window hints based on capabilities
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+  glfwWindowHint(GLFW_DOUBLEBUFFER, (cap & cap_double) ? GLFW_TRUE : GLFW_FALSE);
+  glfwWindowHint(GLFW_DEPTH_BITS, (cap & cap_depth) ? 24 : 0);
+  glfwWindowHint(GLFW_STENCIL_BITS, (cap & cap_stencil) ? 8 : 0);
+  glfwWindowHint(GLFW_SAMPLES, (cap & cap_multisample) ? 4 : 0);
+  glfwWindowHint(GLFW_STEREO, (cap & cap_stereo) ? GLFW_TRUE : GLFW_FALSE);
+  
+  window = glfwCreateWindow(int(width(box)), int(height(box)), name.c_str(), nullptr, nullptr);
+  if (!window) {
+    std::cerr << "Failed to create GLFW window" << std::endl;
+    glfwTerminate();
+    exit(EXIT_FAILURE);
+  }
+  
+  // Set window position
+  glfwSetWindowPos(window, int(xmin(box)), int(ymin(box)));
+  
+  glfwMakeContextCurrent(window);
   instance = this;
-  glutDisplayFunc(display);
-  glutReshapeFunc(reshape);
-  glutKeyboardFunc(keyboard);
-  glutKeyboardUpFunc(keyboardup);
-  glutSpecialFunc(special);
-  glutSpecialUpFunc(specialup);
-  glutMouseFunc(mouse);
-  glutMotionFunc(motion);
-  glutPassiveMotionFunc(passive_motion);
-  glutVisibilityFunc(visibility);
-  glutSetKeyRepeat(GLUT_KEY_REPEAT_OFF);
-  glutIgnoreKeyRepeat(1);
+  
+  // Set GLFW callbacks
+  glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+  glfwSetKeyCallback(window, key_callback);
+  glfwSetCharCallback(window, char_callback);
+  glfwSetMouseButtonCallback(window, mouse_button_callback);
+  glfwSetCursorPosCallback(window, cursor_pos_callback);
+  glfwSetWindowIconifyCallback(window, window_iconify_callback);
+  
+  // Store instance pointer in window user pointer
+  glfwSetWindowUserPointer(window, this);
+  
   // Don't know how to set that
   Font::setPointSize(LiteWindow::screenResolutionPT());
   
@@ -119,7 +218,10 @@ LiteWindow::LiteWindow(const string& name, const Box& box, unsigned int cap)
 
 LiteWindow::~LiteWindow()
 {
-  glutDestroyWindow(win);
+  if (window) {
+    glfwDestroyWindow(window);
+    window = nullptr;
+  }
   if (instance == this)
     instance = 0;
 }
@@ -283,7 +385,7 @@ LiteWindow::display()
     delete img;
     time_shift += time() - now;
   }
-  glutSwapBuffers();
+  glfwSwapBuffers(window);
 }
 
 void
@@ -341,25 +443,42 @@ LiteWindow::reshape(int w, int h)
 void
 LiteWindow::modifiers(int x, int y)
 {
-  int mods = glutGetModifiers();
+  // GLFW handles modifiers differently - they are passed as parameters to callbacks
+  // For now, we'll query the current state directly
+  if (!window) return;
+  
+  int mods = 0;
+  if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS || 
+      glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS) {
+    mods |= 0x1; // SHIFT
+  }
+  if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS || 
+      glfwGetKey(window, GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS) {
+    mods |= 0x2; // CTRL
+  }
+  if (glfwGetKey(window, GLFW_KEY_LEFT_ALT) == GLFW_PRESS || 
+      glfwGetKey(window, GLFW_KEY_RIGHT_ALT) == GLFW_PRESS) {
+    mods |= 0x4; // ALT
+  }
+  
   if (mods == modifiers_)
     return;
 #ifdef PRINT
   std::cout << "Modifiers = " << mods << std::endl;
 #endif
-  if ((modifiers_&GLUT_ACTIVE_SHIFT) != (mods&GLUT_ACTIVE_SHIFT)) {
+  if ((modifiers_&0x1) != (mods&0x1)) {
     doKeyboard(keycode_shift,
-	       (mods&GLUT_ACTIVE_SHIFT)!=0,
+	       (mods&0x1)!=0,
 	       x, y);
   }
-  if ((modifiers_&GLUT_ACTIVE_CTRL) != (mods&GLUT_ACTIVE_CTRL)) {
+  if ((modifiers_&0x2) != (mods&0x2)) {
     doKeyboard(keycode_ctrl,
-	       (mods&GLUT_ACTIVE_CTRL)!=0,
+	       (mods&0x2)!=0,
 	       x, y);
   }
-  if ((modifiers_&GLUT_ACTIVE_ALT) != (mods&GLUT_ACTIVE_ALT)) {
+  if ((modifiers_&0x4) != (mods&0x4)) {
     doKeyboard(keycode_alt,
-	       (mods&GLUT_ACTIVE_ALT)!=0,
+	       (mods&0x4)!=0,
 	       x, y);
   }
   modifiers_ = mods;
@@ -371,77 +490,40 @@ LiteWindow::doKeyboard(int key, bool down, int x, int y)
   fireKeyboardHandler(key, down);
 }
 
-void 
-LiteWindow::keyboard(unsigned char key, int x, int y)
-{
-  if (instance == 0)
-    return;
-  
-  instance->modifiers(x, y);
-  instance->doKeyboard(key, true, x, int(height(instance->bounds)-y));
-}
-
-void 
-LiteWindow::keyboardup(unsigned char key, int x, int y)
-{
-  if (instance == 0)
-    return;
-  
-  instance->modifiers(x, y);
-  instance->doKeyboard(key, false, x, int(height(instance->bounds)-y));
-}
-
-static int
-glut_to_keycode(int key)
+int
+LiteWindow::glfw_to_keycode(int key)
 {
   switch(key) {
-  case GLUT_KEY_F1: key = keycode_f1; break;
-  case GLUT_KEY_F2: key = keycode_f2; break;
-  case GLUT_KEY_F3: key = keycode_f3; break;
-  case GLUT_KEY_F4: key = keycode_f4; break;
-  case GLUT_KEY_F5: key = keycode_f5; break;
-  case GLUT_KEY_F6: key = keycode_f6; break;
-  case GLUT_KEY_F7: key = keycode_f7; break;
-  case GLUT_KEY_F8: key = keycode_f8; break;
-  case GLUT_KEY_F9: key = keycode_f9; break;
-  case GLUT_KEY_F10: key = keycode_f10; break;
-  case GLUT_KEY_F11: key = keycode_f11; break;
-  case GLUT_KEY_F12: key = keycode_f12; break;
-  case GLUT_KEY_LEFT: key = keycode_left; break;
-  case GLUT_KEY_UP: key = keycode_up; break;
-  case GLUT_KEY_RIGHT: key = keycode_right; break;
-  case GLUT_KEY_DOWN: key = keycode_down; break;
-  case GLUT_KEY_PAGE_UP: key = keycode_up; break;
-  case GLUT_KEY_PAGE_DOWN: key = keycode_down; break;
-  case GLUT_KEY_HOME: key = keycode_home; break;
-  case GLUT_KEY_END: key = keycode_end; break;
-  case GLUT_KEY_INSERT: key = keycode_insert; break;
+  case GLFW_KEY_F1: key = keycode_f1; break;
+  case GLFW_KEY_F2: key = keycode_f2; break;
+  case GLFW_KEY_F3: key = keycode_f3; break;
+  case GLFW_KEY_F4: key = keycode_f4; break;
+  case GLFW_KEY_F5: key = keycode_f5; break;
+  case GLFW_KEY_F6: key = keycode_f6; break;
+  case GLFW_KEY_F7: key = keycode_f7; break;
+  case GLFW_KEY_F8: key = keycode_f8; break;
+  case GLFW_KEY_F9: key = keycode_f9; break;
+  case GLFW_KEY_F10: key = keycode_f10; break;
+  case GLFW_KEY_F11: key = keycode_f11; break;
+  case GLFW_KEY_F12: key = keycode_f12; break;
+  case GLFW_KEY_LEFT: key = keycode_left; break;
+  case GLFW_KEY_UP: key = keycode_up; break;
+  case GLFW_KEY_RIGHT: key = keycode_right; break;
+  case GLFW_KEY_DOWN: key = keycode_down; break;
+  case GLFW_KEY_PAGE_UP: key = keycode_up; break;
+  case GLFW_KEY_PAGE_DOWN: key = keycode_down; break;
+  case GLFW_KEY_HOME: key = keycode_home; break;
+  case GLFW_KEY_END: key = keycode_end; break;
+  case GLFW_KEY_INSERT: key = keycode_insert; break;
+  case GLFW_KEY_BACKSPACE: key = keycode_backspace; break;
+  case GLFW_KEY_TAB: key = keycode_tab; break;
+  case GLFW_KEY_ENTER: key = keycode_return; break;
+  case GLFW_KEY_ESCAPE: key = keycode_escape; break;
+  case GLFW_KEY_SPACE: key = keycode_space; break;
   default:
     key = keycode_none;
   }
   return key;
-}
-
-void
-LiteWindow::special(int key, int x, int y)
-{
-  if (instance == 0)
-    return;
-  
-  instance->modifiers(x, y);
-  instance->doKeyboard(glut_to_keycode(key),
-		       true, x, int(height(instance->bounds)-y));
-}
-
-void
-LiteWindow::specialup(int key, int x, int y)
-{
-  if (instance == 0)
-    return;
-  
-  instance->modifiers(x, y);
-  instance->doKeyboard(glut_to_keycode(key), 
-		       false, x, int(height(instance->bounds)-y));
 }
 
 
@@ -452,36 +534,9 @@ LiteWindow::doMouse(int button, bool down, int x, int y)
 }
 
 void 
-LiteWindow::mouse(int button, int state, int x, int y)
-{
-  cursor_x = x;
-  cursor_y = int(height(instance->bounds)-y);
-  if (instance == 0)
-    return;
-  instance->modifiers(x, y);
-#ifdef PRINT
-  std::cout << "Mouse\n";
-#endif
-  instance->doMouse(button,
-		    state == GLUT_DOWN,
-		    x, cursor_y);
-}
-
-void 
 LiteWindow::doMotion(int x, int y)
 {
   fireMouseHandlerMotion(x, y);
-}
-
-void 
-LiteWindow::motion(int x, int y)
-{
-  cursor_x = x;
-  cursor_y = int(height(instance->bounds)-y);
-  if (instance == 0)
-    return;
-  instance->modifiers(x, y);
-  instance->doMotion(x, cursor_y);
 }
 
 void 
@@ -491,28 +546,9 @@ LiteWindow::doPassiveMotion(int x, int y)
 }
 
 void 
-LiteWindow::passive_motion(int x, int y)
-{
-  cursor_x = x;
-  cursor_y = int(height(instance->bounds)-y);
-  if (instance == 0)
-    return;
-  instance->modifiers(x, y);
-  instance->doPassiveMotion(x, cursor_y);
-}
-
-void 
 LiteWindow::doTimer(int value)
 {
   fireTimerHandler(value);
-}
-
-void 
-LiteWindow::timer(int value)
-{
-  if (instance == 0)
-    return;
-  instance->doTimer(value);
 }
 
 void
@@ -523,24 +559,23 @@ LiteWindow::doVisible(bool visible)
 }
 
 void
-LiteWindow::visibility(int state)
-{
-  if (instance == 0)
-    return;
-  instance->doVisible(state == GLUT_VISIBLE);
-}
-
-void
 LiteWindow::run()
 {
-  glutMainLoop();
+  while (!glfwWindowShouldClose(window)) {
+    glfwPollEvents();
+    
+    // Trigger display
+    display();
+  }
 }
 
 void
 LiteWindow::setName(const string& n)
 {
   name = n;
-  glutSetWindowTitle(name.c_str());  
+  if (window) {
+    glfwSetWindowTitle(window, name.c_str());
+  }
 }
 
 void
@@ -554,7 +589,15 @@ LiteWindow::setColor(const Color& c)
 void
 LiteWindow::setFullscreen(bool b)
 {
-  glutFullScreen();
+  if (window) {
+    if (b) {
+      GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+      const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+      glfwSetWindowMonitor(window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
+    } else {
+      glfwSetWindowMonitor(window, nullptr, 100, 100, 800, 600, GLFW_DONT_CARE);
+    }
+  }
 }
 
 void
@@ -575,39 +618,51 @@ LiteWindow::getClear(Buffer b)
 LiteWindow::Cursor
 LiteWindow::getCursor() const
 {
-  return Cursor(glutGet(GLUT_WINDOW_CURSOR));
+  // GLFW doesn't have a direct equivalent to glutGet(GLUT_WINDOW_CURSOR)
+  // We'll store the cursor state internally
+  return cursor_right_arrow; // default
 }
 
-static int glut_cursor[] = {
-  0,
-  1,
-  2,
-  3,
-  4,
-  5,
-  6,
-  7,
-  8,
-  9,
-  10,
-  11,
-  12,
-  13,
-  14,
-  15,
-  16,
-  17,
-  18,
-  19,
-  100,
-  101,
-  102
+static int glfw_cursor[] = {
+  GLFW_ARROW_CURSOR,        // cursor_right_arrow
+  GLFW_ARROW_CURSOR,        // cursor_left_arrow
+  GLFW_ARROW_CURSOR,        // cursor_info
+  GLFW_ARROW_CURSOR,        // cursor_destroy
+  GLFW_ARROW_CURSOR,        // cursor_help
+  GLFW_ARROW_CURSOR,        // cursor_cycle
+  GLFW_ARROW_CURSOR,        // cursor_spray
+  GLFW_ARROW_CURSOR,        // cursor_wait
+  GLFW_IBEAM_CURSOR,        // cursor_text
+  GLFW_CROSSHAIR_CURSOR,    // cursor_crosshair
+  GLFW_VRESIZE_CURSOR,      // cursor_up_down
+  GLFW_HRESIZE_CURSOR,      // cursor_left_right
+  GLFW_VRESIZE_CURSOR,      // cursor_top_side
+  GLFW_VRESIZE_CURSOR,      // cursor_bottom_side
+  GLFW_HRESIZE_CURSOR,      // cursor_left_side
+  GLFW_HRESIZE_CURSOR,      // cursor_right_side
+  GLFW_ARROW_CURSOR,        // cursor_top_left_corner - no direct equivalent
+  GLFW_ARROW_CURSOR,        // cursor_top_right_corner - no direct equivalent
+  GLFW_ARROW_CURSOR,        // cursor_bottom_right_corner - no direct equivalent
+  GLFW_ARROW_CURSOR,        // cursor_bottom_left_corner - no direct equivalent
+  GLFW_ARROW_CURSOR,        // cursor_inherit
+  0,                        // cursor_none - special case
+  GLFW_CROSSHAIR_CURSOR,    // cursor_full_crosshair
 };
 
 void
 LiteWindow::setCursor(Cursor c)
 {
-  glutSetCursor(glut_cursor[int(c)]);
+  if (!window) return;
+  
+  if (c == cursor_none) {
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+  } else {
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    GLFWcursor* cursor = glfwCreateStandardCursor(glfw_cursor[int(c)]);
+    if (cursor) {
+      glfwSetCursor(window, cursor);
+    }
+  }
 }
 
 void
@@ -622,31 +677,41 @@ LiteWindow::setCursor(Image * c)
 int
 LiteWindow::time()
 {
-  return int((glutGet(GLUT_ELAPSED_TIME) - time_shift) / time_divisor);
+  return int((glfwGetTime() * 1000.0 - time_shift) / time_divisor);
 }
 
 int
 LiteWindow::screenWidth()
 {
-  return glutGet(GLUT_SCREEN_WIDTH);
+  GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+  const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+  return mode ? mode->width : 1920; // fallback
 }
 
 int 
 LiteWindow::screenHeight()
 {
-  return glutGet(GLUT_SCREEN_HEIGHT);
+  GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+  const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+  return mode ? mode->height : 1080; // fallback
 }
 
 int 
 LiteWindow::screenWidthMM()
 {
-  return glutGet(GLUT_SCREEN_WIDTH_MM);
+  GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+  int widthMM, heightMM;
+  glfwGetMonitorPhysicalSize(monitor, &widthMM, &heightMM);
+  return widthMM;
 }
 
 int 
 LiteWindow::screenHeightMM()
 {
-  return glutGet(GLUT_SCREEN_HEIGHT_MM);
+  GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+  int widthMM, heightMM;
+  glfwGetMonitorPhysicalSize(monitor, &widthMM, &heightMM);
+  return heightMM;
 }
 
 float
@@ -797,19 +862,10 @@ LiteWindow::fireKeyboardHandler(int key, bool down) const
 void
 LiteWindow::addTimerHandler(unsigned long millis, TimerHandler * h)
 {
-  int v;
-  std::vector<TimerHandler*>::iterator i =
-    std::find(timer_handler_.begin(), timer_handler_.end(),
-	      (TimerHandler*)(0));
-  if (i == timer_handler_.end()) {
-    v = timer_handler_.size();
-    timer_handler_.push_back(h);
-  }
-  else {
-    v = i - timer_handler_.begin();
-    *i = h;
-  }
-  glutTimerFunc(millis, timer, v);
+  // TODO: Implement timer handling with GLFW
+  // GLFW doesn't have built-in timer functions like GLUT
+  // For now, timers are disabled
+  std::cerr << "Warning: Timer functionality not yet implemented in GLFW version" << std::endl;
 }
 
 static TimerHandler waiting_timer_handler;

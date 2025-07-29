@@ -28,6 +28,8 @@
 #include <infovis/drawing/drawing.hpp>
 #include <infovis/drawing/lite/LiteGroup.hpp>
 
+struct GLFWwindow; // Forward declaration
+
 namespace infovis {
 class Image;
 class Manager3State;
@@ -167,6 +169,9 @@ public:
   bool removeTimerHandler(TimerHandler *);
   void removeAllTimerHandlers();
   void fireTimerHandler(int value);
+  
+  void do_reshape(int w, int h);
+  int glfw_to_keycode(int key);
 
 protected:
   int win;
@@ -175,7 +180,6 @@ protected:
   double far_plane;
   static LiteWindow * instance;
   Color color;
-  void do_reshape(int w, int h);
   unsigned int clear_mask;
   Image * cursor_;
   long redisplay_count_;
@@ -185,17 +189,9 @@ protected:
   std::vector<TimerHandler*> timer_handler_;
 
   void modifiers(int x, int y);
+  
   static void display();
   static void reshape(int w, int h);
-  static void keyboard(unsigned char key, int x, int y);
-  static void keyboardup(unsigned char key, int x, int y);
-  static void special(int key, int x, int y);
-  static void specialup(int key, int x, int y);
-  static void mouse(int button, int state, int x, int y);
-  static void motion(int x, int y);
-  static void passive_motion(int x, int y);
-  static void timer(int value);
-  static void visibility(int state);
 };
 
 } // namespace infovis
