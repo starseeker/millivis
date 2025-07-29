@@ -14,10 +14,8 @@ The png library for reading and writing PNG compressed images,
     available at http://www.libpng.org/
 The OpenGL library, with its utilities, available with your system
     usually.
-The glut library, available at several places:
-    for unix/linux systems:
-    http://www.opengl.org/developers/documentation/glut.html
-    for Win32 systems:  http://www.xmission.com/~nate/glut.html
+The GLFW library for window management and input handling, available at
+    https://www.glfw.org/
 The Expat library for reading XML, available at
     http://expat.sourceforge.net
 
@@ -50,6 +48,20 @@ depending on the compiler.
 When it is done, you should have everything compiled in the toplevel
 directory, with several test files and the main "treemap2" file ready
 to use.
+
+MODERN CMAKE BUILD (RECOMMENDED)
+
+The project now also supports modern CMake builds. Create a build directory
+and use CMake:
+
+mkdir build
+cd build
+cmake ..
+make -j4
+
+This will automatically find and link the required dependencies including
+GLFW, OpenGL, FreeType, PNG, zlib, and Expat. The CMake build system
+is the recommended way to build the project.
 
 
 PROBLEMS
