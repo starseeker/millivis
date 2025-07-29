@@ -2,13 +2,13 @@
 
 add_executable(test_gl_drawer test_gl_drawer.cpp)
 target_link_libraries(test_gl_drawer PRIVATE liblite libtree libtable
-    png z freetype expat GL GLU glut)
+    png z freetype expat GL GLU glfw)
 
 # add_executable(test_gl_cs_drawer test_gl_cs_drawer.cpp)
 
 add_executable(test_gl_pick test_gl_pick.cpp)
 target_link_libraries(test_gl_pick PRIVATE liblite libtree libtable
-    png z freetype expat GL GLU glut)
+    png z freetype expat GL GLU glfw)
 
 add_executable(test_lite_drawer test_lite_drawer.cpp)
 target_link_libraries(test_lite_drawer PRIVATE 

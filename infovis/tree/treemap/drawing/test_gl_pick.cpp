@@ -24,6 +24,7 @@
  */
 #include <GLFW/glfw3.h>
 #include <GL/glu.h>
+#include <iostream>
 #include <infovis/tree/vector_as_tree.hpp>
 #include <infovis/tree/treemap/slice_and_dice.hpp>
 #include <infovis/tree/treemap/squarified.hpp>
@@ -36,6 +37,9 @@
 
 using namespace infovis;
 //#define DOUBLE_BUFFER
+
+// GLFW globals
+static GLFWwindow* window = nullptr;
 
 typedef vector_as_tree Tree;
 typedef tree_traits<Tree>::node_descriptor node_descriptor;
@@ -101,36 +105,25 @@ struct compare_weight {
 
 typedef debug_drawer<Tree, Box, gl_drawer<Tree,Box> > Drawer;
 
-static void display()
-{
-#ifdef SLICE_AND_DICE
-  static treemap_slice_and_dice<
-    Tree,Box,WeightMap, Drawer>
-    tmsd(t, wm);
-  tmsd.start();
-  tmsd.visit(left_to_right, treemap_box, root(t));
-  tmsd.finish();
-#else
-  static treemap_squarified<
-    Tree,Box,WeightMap, Drawer >
-    tmsq(t, wm);
-  tmsq.start();
-  tmsq.visit(treemap_box, root(t));
-  tmsq.finish();
-#endif
-  gl::color(1.0, 1.0, 1.0);
-  draw_box(label_box);
-#ifdef DOUBLE_BUFFER
-  glutSwapBuffers();
-#else
-  glFlush();
-#endif
-
+// GLFW callback functions
+static void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+  win_width = width;
+  win_height = height;
+  glViewport(0, 0, width, height);
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  gluOrtho2D(0, width, 0, height);
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+  treemap_box = Box(0, 0, win_width, win_height);
+  label_box = Box(0, 0, 200, 20);
 }
 
-static void passive_motion(int x, int y)
-{
-  y = win_height - y;
+static void cursor_position_callback(GLFWwindow* window, double xpos, double ypos) {
+  // Convert GLFW coordinates to OpenGL coordinates (flip Y)
+  int x = static_cast<int>(xpos);
+  int y = win_height - static_cast<int>(ypos);
+  
   typedef debug_drawer<Tree,Box, pick_drawer<Tree,Box> > Picker;
   Picker hit;
   hit.reset(x, y);
@@ -152,27 +145,52 @@ static void passive_motion(int x, int y)
 #endif
   if (hit.has_picked()) {
     node_descriptor h = hit.picked_node();
-    if (h != labeled_node) {
-      labeled_node = h;
-      gl::color(1.0, 1.0, 1.0);
-      draw_box(label_box);
-      gl::color(0.0, 0.0, 0.0);
-      gl::raster_pos(5, 5);
-      const std::string& name = names[h];
-      for (char c : name) {
-	glutBitmapCharacter(GLUT_BITMAP_9_BY_15, c);
-      }
-#ifdef DOUBLE_BUFFER
-      glDrawBuffer(GL_FRONT);
-      gl::raster_pos(xmin(label_box), ymin(label_box));
-      glCopyPixels(int(xmin(label_box)), int(ymin(label_box)),
-		   int(width(label_box)), int(height(label_box)),
-		   GL_COLOR);
-      glDrawBuffer(GL_BACK);
-#endif
-    }
+    labeled_node = h;
   }
+  else {
+    labeled_node = tree_traits<Tree>::nil();
+  }
+}
+
+static void display()
+{
+#ifdef SLICE_AND_DICE
+  static treemap_slice_and_dice<
+    Tree,Box,WeightMap, Drawer>
+    tmsd(t, wm);
+  tmsd.start();
+  tmsd.visit(left_to_right, treemap_box, root(t));
+  tmsd.finish();
+#else
+  static treemap_squarified<
+    Tree,Box,WeightMap, Drawer >
+    tmsq(t, wm);
+  tmsq.start();
+  tmsq.visit(treemap_box, root(t));
+  tmsq.finish();
+#endif
+  gl::color(1.0, 1.0, 1.0);
+  draw_box(label_box);
+  
+  // Draw label for currently selected node
+  if (labeled_node != tree_traits<Tree>::nil()) {
+    gl::color(0.0, 0.0, 0.0);
+    gl::raster_pos(5, 5);
+    const std::string& name = names[labeled_node];
+    // TODO: Replace GLUT bitmap character rendering with GLFW-compatible text rendering
+    // For now, the picking functionality works without text rendering
+    /*
+    for (char c : name) {
+      glutBitmapCharacter(GLUT_BITMAP_9_BY_15, c);
+    }
+    */
+  }
+  
   glFlush();
+  if (window) {
+    glfwSwapBuffers(window);
+  }
+
 }
 
 static void init()
@@ -188,13 +206,6 @@ static void init()
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
   labeled_node = root(t);
-}
-
-static void reshape(int w, int h)
-{
-  win_width = w;
-  win_height = h;
-  init();
 }
 
 int main(int argc, char * argv[])
@@ -221,21 +232,38 @@ int main(int argc, char * argv[])
 
   win_height = 768;
   win_width = 1024;
-  glutInit(&argc, argv);
-#ifdef DOUBLE_BUFFER
-  glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
-#else
-  glutInitDisplayMode(GLUT_RGB);
-#endif
-  glutInitWindowSize (win_width, win_height); 
-  glutInitWindowPosition (0, 0);
-  glutCreateWindow (argv[0]);
+  
+  // Initialize GLFW
+  if (!glfwInit()) {
+    std::cerr << "Failed to initialize GLFW" << std::endl;
+    return -1;
+  }
+  
+  // Configure GLFW
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+  
+  // Create window
+  window = glfwCreateWindow(win_width, win_height, argv[0], nullptr, nullptr);
+  if (!window) {
+    std::cerr << "Failed to create GLFW window" << std::endl;
+    glfwTerminate();
+    return -1;
+  }
+  
+  glfwMakeContextCurrent(window);
+  glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+  glfwSetCursorPosCallback(window, cursor_position_callback);
 
   init();
-  glutDisplayFunc(display);
-  glutPassiveMotionFunc(passive_motion);
-  glutReshapeFunc(reshape);
   
-  glutMainLoop();
+  // Main loop
+  while (!glfwWindowShouldClose(window)) {
+    glfwPollEvents();
+    glClear(GL_COLOR_BUFFER_BIT);
+    display();
+  }
+  
+  glfwTerminate();
   return 0;
 }
