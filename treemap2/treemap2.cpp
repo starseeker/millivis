@@ -122,9 +122,9 @@ public:
       dryrun_(false)
   {
     label_font_ = props->get_font("label.font",
-				  Font::create("Arial", "plain", 12));
+				  Font::create("ProFont", "plain", 12));
     monitor_font_ = props->get_font("monitor.label.font",
-				    Font::create("Arial", "plain", 12));
+				    Font::create("ProFont", "plain", 12));
 
     // Fallback to safe height if font creation failed
     int font_height = monitor_font_ ? monitor_font_->getHeight() : 12;

@@ -32,13 +32,13 @@ add_executable(test_color test_color.cpp)
 target_link_libraries(test_color PRIVATE liblite ${MILLIONVIS_LIBS})
 
 add_executable(test_lite test_lite.cpp)
-target_link_libraries(test_lite PRIVATE liblite ${MILLIONVIS_LIBS})
+target_link_libraries(test_lite PRIVATE liblite liblite_lite liblite_inter ${MILLIONVIS_LIBS})
 
 add_executable(test_lite_pick test_lite_pick.cpp)
-target_link_libraries(test_lite_pick PRIVATE liblite ${MILLIONVIS_LIBS})
+target_link_libraries(test_lite_pick PRIVATE liblite liblite_lite liblite_inter ${MILLIONVIS_LIBS})
 
 add_executable(test_font test_font.cpp)
-target_link_libraries(test_font PRIVATE liblite ${MILLIONVIS_LIBS})
+target_link_libraries(test_font PRIVATE liblite liblite_lite liblite_inter ${MILLIONVIS_LIBS})
 
 # Note: test_lite_* executables are defined in the lite subdirectory
 
