@@ -53,7 +53,7 @@ Properties::get_double(const string& key, double def) const
 Font *
 Properties::get_font(const string& key, Font * def) const
 {
-  const string& name = get(key + ".name", "Arial");
+  const string& name = get(key + ".name", "ProFont");
   const string& style = get(key + ".style", "plain");
   float size = get_double(key + ".size", 12.0);
   
