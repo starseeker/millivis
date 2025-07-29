@@ -40,15 +40,7 @@ target_link_libraries(test_lite_pick PRIVATE liblite ${MILLIONVIS_LIBS})
 add_executable(test_font test_font.cpp)
 target_link_libraries(test_font PRIVATE liblite ${MILLIONVIS_LIBS})
 
-# Add dependencies for test_lite_box and test_lite_slider
-add_executable(test_lite_box test_lite_box.cpp)
-target_link_libraries(test_lite_box PRIVATE liblite libtree ${MILLIONVIS_LIBS})
-
-add_executable(test_lite_slider test_lite_slider.cpp)
-target_link_libraries(test_lite_slider PRIVATE liblite libtree ${MILLIONVIS_LIBS})
-
-add_executable(test_lite_color test_lite_color.cpp)
-target_link_libraries(test_lite_color PRIVATE liblite libtree ${MILLIONVIS_LIBS})
+# Note: test_lite_* executables are defined in the lite subdirectory
 
 add_subdirectory(colors)
 add_subdirectory(lite)

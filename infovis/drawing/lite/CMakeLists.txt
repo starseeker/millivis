@@ -45,10 +45,13 @@ add_library(liblite_lite STATIC ${LITE_SOURCES})
 target_link_libraries(liblite_lite PRIVATE liblite liblite_notifiers png z freetype expat GL GLU glut)
 
 add_executable(test_lite_as_tree test_lite_as_tree.cpp)
+target_link_libraries(test_lite_as_tree PRIVATE liblite_lite libtree ${MILLIONVIS_LIBS})
+
 add_executable(test_lite_box test_lite_box.cpp)
-target_link_libraries(test_lite_box PRIVATE liblite libtree ${MILLIONVIS_LIBS})
+target_link_libraries(test_lite_box PRIVATE liblite_lite libtree ${MILLIONVIS_LIBS})
 
 add_executable(test_lite_slider test_lite_slider.cpp)
-target_link_libraries(test_lite_slider PRIVATE liblite libtree ${MILLIONVIS_LIBS})
+target_link_libraries(test_lite_slider PRIVATE liblite_lite libtree ${MILLIONVIS_LIBS})
+
 add_executable(test_lite_color test_lite_color.cpp)
-target_link_libraries(test_lite_color PRIVATE liblite libtree ${MILLIONVIS_LIBS})
+target_link_libraries(test_lite_color PRIVATE liblite_lite libtree ${MILLIONVIS_LIBS})
