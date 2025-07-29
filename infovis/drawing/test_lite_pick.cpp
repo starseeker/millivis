@@ -25,7 +25,6 @@
 #include <infovis/drawing/lite/LiteLabel.hpp>
 #include <infovis/drawing/lite/LiteMover.hpp>
 #include <infovis/drawing/lite/LiteWindow.hpp>
-#include <GL/glut.h>
 #include <iostream>
 
 using namespace infovis;

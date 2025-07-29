@@ -24,7 +24,7 @@
  */
 #include <infovis/drawing/lite/LiteSaveUnder.hpp>
 #include <infovis/drawing/gl.hpp>
-#include <GL/glut.h>
+#include <GLFW/glfw3.h>
 
 namespace infovis {
 
@@ -87,13 +87,17 @@ LiteSaveUnder::refresh()
       drawBuffer == GL_BACK_LEFT ||
       drawBuffer == GL_BACK_RIGHT) {
     glDrawBuffer(GL_FRONT);
-    glutSetCursor(GLUT_CURSOR_NONE);
+    // TODO: GLFW migration - glutSetCursor(GLUT_CURSOR_NONE) equivalent
+    // In GLFW, cursor management requires a window handle: glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN)
+    // glutSetCursor(GLUT_CURSOR_NONE);
     glRasterPos2d(xmin(saved), ymin(saved));
     glCopyPixels(xmin(saved), ymin(saved),
 		 width(saved), height(saved),
 		 GL_COLOR);
     glDrawBuffer(GL_BACK);
-    glutSetCursor(GLUT_CURSOR_INHERIT);
+    // TODO: GLFW migration - glutSetCursor(GLUT_CURSOR_INHERIT) equivalent  
+    // In GLFW: glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL)
+    // glutSetCursor(GLUT_CURSOR_INHERIT);
   }
   glFlush();
 }

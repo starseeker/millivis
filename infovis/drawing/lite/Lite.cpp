@@ -25,7 +25,7 @@
 #include <infovis/drawing/lite/Lite.hpp>
 #include <infovis/drawing/inter/Interactor.hpp>
 #include <infovis/drawing/gl.hpp>
-#include <GL/glut.h>
+#include <GLFW/glfw3.h>
 #include <stdexcept>
 //#include <iostream>
 
@@ -196,7 +196,10 @@ Lite::end() const
 void
 Lite::repaint() const
 {
-  glutPostRedisplay();
+  // TODO: GLFW migration - glutPostRedisplay() equivalent
+  // In GLFW, the application needs to manage redraws through the main event loop
+  // This is a placeholder - proper GLFW integration requires restructuring the Lite framework
+  // glutPostRedisplay();
 }
 
 void
