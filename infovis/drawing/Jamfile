@@ -7,9 +7,7 @@ Main test_point_vec : test_point_vec.cpp ;
 SOURCES =
 	drawing
 	Font
-	FontGlut
-	FontWin32
-	FontFT
+	installStrueTypeFontStub
 	Image
 	ImagePNG
 	SaveUnder

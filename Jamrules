@@ -23,14 +23,14 @@ LINKLIBS += $(LIB_ZLIB) ;
 LIB_PNG = -lpng ;
 LINKLIBS += $(LIB_PNG) ;
 
-DIR_FT = /usr/X11R6 ;
-HDRS_FT = $(DIR_FT)/include/freetype2 ;
-LIB_FT = -L $(DIR_FT)/lib -lfreetype ;
+# DIR_FT = /usr/X11R6 ;
+# HDRS_FT = $(DIR_FT)/include/freetype2 ;
+# LIB_FT = -L $(DIR_FT)/lib -lfreetype ;
 
-HDRS += $(HDRS_FT) ;
+# HDRS += $(HDRS_FT) ;
 HDRS += . ;
 
-LINKLIBS += $(LIB_FT) ;
+# LINKLIBS += $(LIB_FT) ;
 
 LIB_GLUT = -lglut32 -lglu32 -lopengl32 ;
 LINKLIBS += $(LIB_GLUT) ;
@@ -83,12 +83,12 @@ LIB_PNG = $(DIR_PNG)/libpng$(SUFLIB) ;
 HDRS += $(HDRS_PNG) ;
 LINKLIBS += $(LIB_PNG) ;
 
-# Where FreeType is located
-DIR_FT = $(REQS_DIR)/freetype ;
-LIB_FT = $(DIR_FT)/$(LIBPREFIX)freetype$(SUFLIB) ;
+# Where FreeType is located (no longer needed)
+# DIR_FT = $(REQS_DIR)/freetype ;
+# LIB_FT = $(DIR_FT)/$(LIBPREFIX)freetype$(SUFLIB) ;
 
-HDRS += $(HDRS_FT) ;
-LINKLIBS += $(LIB_FT) ;
+# HDRS += $(HDRS_FT) ;
+# LINKLIBS += $(LIB_FT) ;
 
 LIB_GLUT = glut32.lib glu32.lib opengl32.lib gdi32.lib user32.lib ;
 

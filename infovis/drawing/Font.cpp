@@ -27,6 +27,11 @@
 //#include <infovis/drawing/FontWin32.hpp>
 //#include <infovis/drawing/FontFT.hpp>
 
+// Forward declaration for new font system
+namespace infovis {
+  extern void installStrueTypeFont();
+}
+
 //#define PRINT
 #ifdef PRINT
 #include <iostream>
@@ -59,18 +64,14 @@ Font::Creator::Creator()
   first = this;
 }
 
-extern void installFontGlut();
-extern void installFontWin32();
-extern void installFontFT();
+extern void installStrueTypeFont();
 
 Font *
 Font::create(const string& name, Style style, float size)
 {
   static bool inited;
   if (! inited) {
-    installFontGlut();
-    installFontWin32();
-    installFontFT();
+    infovis::installStrueTypeFont();
 	inited = true;
   }
   if (size < 0) {

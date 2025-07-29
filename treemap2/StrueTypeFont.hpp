@@ -22,30 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef INFOVIS_DRAWING_FONTGLUT_HPP
-#define INFOVIS_DRAWING_FONTGLUT_HPP
+#ifndef TREEMAP2_STRUETYPEFONT_HPP
+#define TREEMAP2_STRUETYPEFONT_HPP
 
 #include <infovis/drawing/Font.hpp>
+#include <infovis/drawing/gl.hpp>
+#include "font_backend/struetype.h"
+#include "font_backend/fontstash.h"
 
 namespace infovis {
 
 /**
- * Implementation of Glut based stroked fonts.
+ * Font implementation using struetype and fontstash
  */
-class FontGlutStroke : public Font
-{
-protected:
-  void * type;
+class StrueTypeFont : public Font {
 public:
+  StrueTypeFont(const string& name, Style style, float size);
+  virtual ~StrueTypeFont();
 
-  FontGlutStroke(void * t,
-		 const string& name, Style style, float size);
-
+  // Font interface implementation
   virtual bool install();
   virtual void finish();
-
-  virtual Format getFormat() const;
-  virtual bool isFixedWidth() const;
+  virtual Format getFormat() const { return format_outline; }
+  virtual bool isFixedWidth() const { return false; }
   virtual void paint(const string& str, float x, float y);
   virtual float getLeading() const;
   virtual float getAscent() const;
@@ -53,46 +52,39 @@ public:
   virtual float charWidth(int ch) const;
   virtual float stringWidth(const string& str);
   virtual Box getStringBounds(const string& str);
+
+  // Static initialization
+  static void initialize();
+  static void cleanup();
+
+private:
+  strue_font_t* strue_font_;
+  static FONScontext* fons_context_;
+  static unsigned int texture_id_;
+  static bool initialized_;
+  int font_id_;
+  bool installed_;
+
+  // OpenGL rendering callbacks
+  static int renderCreate(void* uptr, int width, int height);
+  static int renderResize(void* uptr, int width, int height);
+  static void renderUpdate(void* uptr, int* rect, const unsigned char* data);
+  static void renderDraw(void* uptr, const float* verts, const float* tcoords, 
+                        const unsigned int* colors, int nverts);
+  static void renderDelete(void* uptr);
+
+  void ensureInitialized();
 };
 
 /**
- * Implementation of Glut based bitmap fonts.
+ * Font creator for StrueTypeFont
  */
-class FontGlutBitmap : public FontGlutStroke
-{
-protected:
-  float ascent;
-  float descent;
+class StrueTypeFontCreator : public Font::Creator {
 public:
-
-  FontGlutBitmap(void * t,
-		 float ascent, float descent,
-		 const string& name, Style style, float size);
-
-  virtual Format getFormat() const;
-  virtual bool isFixedWidth() const;
-  virtual void paint(const string& str, float x, float y);
-  virtual float getLeading() const;
-  virtual float getAscent() const;
-  virtual float getDescent() const;
-  virtual float charWidth(int ch) const;
-  virtual float stringWidth(const string& str);
-  virtual Box getStringBounds(const string& str);
+  StrueTypeFontCreator();
+  virtual Font* create(const string& name, Font::Style style, float size);
 };
-
-/**
- * Creator or Glut based fonts.
- */
-class FontGlutCreator : public Font::Creator {
-public:
-  FontGlutCreator() {}
-  Font * create(const string& name, Font::Style style, float size);
-};
-
-extern void installFontGlut();
-
-
 
 } // namespace infovis
 
-#endif // INFOVIS_DRAWING_FONTGLUT_HPP
+#endif // TREEMAP2_STRUETYPEFONT_HPP

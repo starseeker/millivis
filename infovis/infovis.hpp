@@ -34,7 +34,7 @@
 * interaction speed.  It relies on the OpenGL graphics library for
 * rendering, as well as several external libraries:
 * - glut on top of OpenGL for ease of use
-* - freetype for font rendering
+* - struetype and fontstash for font rendering (self-contained)
 * - the Boehm-Weiser garbage collector for C and C++ to simplify the
 *   programming
 * - the Boost C++ libraries
