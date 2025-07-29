@@ -1,7 +1,10 @@
 set(DRAWING_SOURCES
     drawing.cpp
     Font.cpp
-    installStrueTypeFontStub.cpp
+    installStrueTypeFont.cpp
+    StrueTypeFont.cpp
+    font_backend/struetype.c
+    font_backend/fontstash.c
     Image.cpp
     ImagePNG.cpp
     SaveUnder.cpp
