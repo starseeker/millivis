@@ -10,6 +10,8 @@ endif()
 
 project(millionvis VERSION 0.2)
 
+add_definitions(-g)
+
 # Set C++ standard to C++17 for modernization
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)

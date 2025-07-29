@@ -90,7 +90,9 @@ LabelTreemap::addLabel(const Box& box)
 bool
 LabelTreemap::layoutLabel(const string& label, const Box& box)
 {
-  Box bounds(font_->getStringBounds(label));
+  Box bounds;
+  if (font_)
+      bounds = font_->getStringBounds(label);
   Vector size(width(bounds), height(bounds));
 
   // Try to put it top-right, bottom-right, top-left, bottom-left in

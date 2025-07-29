@@ -59,12 +59,15 @@ LiteSpeed::doRender(const RenderContext& rc)
   set_color(color_white);
   draw_box(bounds);
   set_color(color_black);
-  float baseline = ymin(bounds)+font_->getDescent();
-  const float xright = xmax(bounds)-font_->stringWidth(buffer);
-  font_->paint(buffer, xright, baseline);
+  float baseline = ymin(bounds);
+  if (font_) {
+     baseline += font_->getDescent();
+     const float xright = xmax(bounds)-font_->stringWidth(buffer);
+     font_->paint(buffer, xright, baseline);
+  }
 
   const StringColumn& name = tm_->getNames();
-  
+
   std::list<string> path;
   const Tree& tree = tm_->getTree();
   for (node_descriptor n = tm_->getMenuPath();
@@ -80,8 +83,10 @@ LiteSpeed::doRender(const RenderContext& rc)
        i++) {
     const string& n = *i;
     bars_.push_back(x);
-    font_->paint(n, x+1, baseline);
-    x += font_->stringWidth(n) + 1;
+    if (font_) {
+       font_->paint(n, x+1, baseline);
+       x += font_->stringWidth(n) + 1;
+    }
     glRectf(x-1, ymin(bounds),x,ymax(bounds));
   }
   bars_.push_back(x);

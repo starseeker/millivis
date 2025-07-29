@@ -225,9 +225,11 @@ LitePath::updateBounds()
 {
   float w = 0;
   for (node_descriptor n = node_; n != root(tree_); n = parent(n, tree_)) {
-    w = std::max(w, font_->stringWidth(name_[n]));
+    float sw = (font_) ? font_->stringWidth(name_[n]) : 0;
+    w = std::max(w, sw);
   }
-  size_ = Vector(w, font_->getHeight() * (depth_+1));
+  float fh = (font_) ? font_->getHeight() : 0;
+  size_ = Vector(w, fh * (depth_+1));
 }
 
 void
