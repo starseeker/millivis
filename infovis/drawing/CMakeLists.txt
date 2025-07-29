@@ -18,7 +18,7 @@ set(DRAWING_SOURCES
 add_library(liblite STATIC ${DRAWING_SOURCES})
 
 # Link liblite with the required libraries and include directories
-target_link_libraries(liblite PRIVATE png z freetype expat GL GLU glut)
+target_link_libraries(liblite PRIVATE png z freetype expat GL GLU glfw)
 target_include_directories(liblite PRIVATE ${CMAKE_SOURCE_DIR})
 # TODO: Add explicit freetype2 include for C++17 modernization
 target_include_directories(liblite PRIVATE /usr/include/freetype2)

@@ -22,7 +22,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include <GL/glut.h>
+#include <GLFW/glfw3.h>
+#include <iostream>
 #include <infovis/drawing/gl_support.hpp>
 #include <infovis/table/csv_loader.hpp>
 #include <infovis/drawing/drawing.hpp>
@@ -37,6 +38,9 @@
 
 using namespace infovis;
 
+// GLFW globals
+static GLFWwindow* window = nullptr;
+
 table t;
 
 static int win_width, win_height;
@@ -44,6 +48,17 @@ static int prev_width, prev_height;
 
 static Box bounds;
 static float * values;
+
+// Forward declarations
+static void init();
+static void display();
+
+// GLFW callback functions
+static void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+  win_width = width;
+  win_height = height;
+  init();
+}
 
 
 static void
@@ -69,7 +84,7 @@ display()
   glClear(GL_COLOR_BUFFER_BIT);
   const int n = int(xmax(bounds));
 
-  int time = glutGet(GLUT_ELAPSED_TIME);
+  double time = glfwGetTime();
 
   glPushMatrix();
   glScalef(win_width / width(bounds), win_height / height(bounds), 1);
@@ -87,8 +102,10 @@ display()
     glDrawArrays(GL_LINE_STRIP, 0, n);
   }
   glPopMatrix();
-  glutSwapBuffers();
-  float t = (glutGet(GLUT_ELAPSED_TIME) - time) / 1000.0f;
+  if (window) {
+    glfwSwapBuffers(window);
+  }
+  double t = glfwGetTime() - time;
   std::cout << "Time "
 	    << t << "s ";
 }
@@ -104,13 +121,6 @@ static void init()
   set_color(color_white);
 }
 
-static void reshape(int w, int h)
-{
-  win_width = w;
-  win_height = h;
-  init();
-}
-
 int main(int argc, char * argv[])
 {
   if (argc != 2 || ! tqd_table(argv[1], t)) {
@@ -120,18 +130,41 @@ int main(int argc, char * argv[])
   update_bounds();
   prev_width = win_height = 768;
   prev_height = win_width = 1024;
-  glutInit(&argc, argv);
-  glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
-  glutInitWindowSize (win_width, win_height);
-  glutInitWindowPosition (0, 0);
-  glutCreateWindow (argv[0]);
+  
+  // Initialize GLFW
+  if (!glfwInit()) {
+    std::cerr << "Failed to initialize GLFW" << std::endl;
+    return -1;
+  }
+  
+  // Configure GLFW
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+  
+  // Create window
+  window = glfwCreateWindow(win_width, win_height, argv[0], nullptr, nullptr);
+  if (!window) {
+    std::cerr << "Failed to create GLFW window" << std::endl;
+    glfwTerminate();
+    return -1;
+  }
+  
+  glfwMakeContextCurrent(window);
+  glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+
   glShadeModel (GL_FLAT);
   init();
   glEnableClientState(GL_VERTEX_ARRAY);
   glClearColor(0, 0, 0, 1);
-  glutDisplayFunc(display); 
-  glutReshapeFunc(reshape);
-  glutMainLoop();
+  
+  // Main loop
+  while (!glfwWindowShouldClose(window)) {
+    glfwPollEvents();
+    glClear(GL_COLOR_BUFFER_BIT);
+    display();
+  }
+  
+  glfwTerminate();
   return 0;
 }
   

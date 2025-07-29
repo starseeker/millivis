@@ -10,7 +10,7 @@ set(TREE_SOURCES
 )
 
 add_library(libtree STATIC ${TREE_SOURCES})
-target_link_libraries(libtree PRIVATE libtable png z freetype expat GL GLU glut)
+target_link_libraries(libtree PRIVATE libtable png z freetype expat GL GLU glfw)
 
 # TODO: Skip test executables for now - require additional Boost modernization
 # add_executable(test_vector_as_tree test_vector_as_tree.cpp)
