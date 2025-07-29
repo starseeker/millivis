@@ -26,7 +26,10 @@ set(TREEMAP2_SOURCES
 add_executable(treemap2 ${TREEMAP2_SOURCES})
 
 # Assuming liblite and libtree are built elsewhere in the project
-target_link_libraries(treemap2 PRIVATE liblite libtree ${MILLIONVIS_LIBS})
+target_link_libraries(treemap2 PRIVATE 
+    liblite liblite_lite liblite_inter liblite_notifiers liblite_colors 
+    libtree libtable 
+    png z freetype expat GL GLU glut)
 target_include_directories(treemap2 PRIVATE ${CMAKE_SOURCE_DIR})
 # TODO: Add current directory to include path for local headers - C++17 modernization
 target_include_directories(treemap2 PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

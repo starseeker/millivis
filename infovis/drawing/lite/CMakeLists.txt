@@ -42,6 +42,7 @@ set(LITE_SOURCES
 )
 
 add_library(liblite_lite STATIC ${LITE_SOURCES})
+target_link_libraries(liblite_lite PRIVATE liblite liblite_notifiers png z freetype expat GL GLU glut)
 
 # TODO: Skip test targets for now - requires Boost tree traits that need modernization
 #add_executable(test_lite_as_tree test_lite_as_tree.cpp)
