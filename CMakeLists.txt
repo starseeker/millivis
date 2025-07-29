@@ -58,4 +58,9 @@ set(MILLIONVIS_LIBS
     ${OPENGL_LIBRARIES}
     ${GLUT_LIBRARIES}
     # Add others as needed
+    CACHE INTERNAL "MillionVis external libraries"
 )
+
+message(STATUS "MILLIONVIS_LIBS = ${MILLIONVIS_LIBS}")
+message(STATUS "PNG_LIBRARIES = ${PNG_LIBRARIES}")
+message(STATUS "OPENGL_LIBRARIES = ${OPENGL_LIBRARIES}")
