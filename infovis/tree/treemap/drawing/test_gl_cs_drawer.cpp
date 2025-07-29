@@ -22,9 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include <GL/glut.h>
-//#include <GL/glu.h>
-#include <infovis/tree/tree.hpp>
+#include <GLFW/glfw3.h>
+#include <GL/glu.h>
+#include <iostream>
+#include <infovis/tree/vector_as_tree.hpp>
+#include <infovis/tree/dir_property_tree.hpp>
 #include <infovis/tree/treemap/slice_and_dice.hpp>
 #include <infovis/tree/treemap/squarified.hpp>
 #include <infovis/tree/treemap/drawing/gl_cs_drawer.hpp>
@@ -34,6 +36,9 @@
 #include <cmath>
 
 using namespace infovis;
+
+// GLFW globals
+static GLFWwindow* window = nullptr;
 
 typedef std::vector<float,gc_alloc<float,true> > WeightMap;
 typedef vector_as_tree Tree;
@@ -86,6 +91,16 @@ struct compare_weight {
 
 typedef debug_drawer<Tree,Box,gl_cs_drawer<Tree,Box> > Drawer;
 
+// Forward declaration
+static void init();
+
+// GLFW callback functions
+static void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+  win_width = width;
+  win_height = height;
+  init();
+}
+
 static void display()
 {
   glClear(GL_COLOR_BUFFER_BIT);
@@ -96,13 +111,16 @@ static void display()
   tmsq.start();
   tmsd.visit(left_to_right, Box(0, 0, win_width, win_height), root(t));
 #else
-  treemap_squarified<Tree,Box,WeightMap, WeightMap, Drawer& >
-    tmsq(t, wm, swm, drawer);
+  treemap_squarified<Tree,Box,WeightMap, Drawer& >
+    tmsq(t, wm, drawer);
   tmsq.start();
   tmsq.visit(Box(0, 0, win_width, win_height), root(t));
 #endif
   tmsq.finish();
   glFlush();
+  if (window) {
+    glfwSwapBuffers(window);
+  }
 
 }
 
@@ -117,13 +135,6 @@ static void init()
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
   changed = true;
-}
-
-static void reshape(int w, int h)
-{
-  win_width = w;
-  win_height = h;
-  init();
 }
 
 int main(int argc, char * argv[])
@@ -150,16 +161,37 @@ int main(int argc, char * argv[])
 
   win_height = 768;
   win_width = 1024;
-  glutInit(&argc, argv);
-  glutInitDisplayMode(GLUT_RGB);
-  glutInitWindowSize (win_width, win_height); 
-  glutInitWindowPosition (0, 0);
-  glutCreateWindow (argv[0]);
+  
+  // Initialize GLFW
+  if (!glfwInit()) {
+    std::cerr << "Failed to initialize GLFW" << std::endl;
+    return -1;
+  }
+  
+  // Configure GLFW
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+  
+  // Create window
+  window = glfwCreateWindow(win_width, win_height, argv[0], nullptr, nullptr);
+  if (!window) {
+    std::cerr << "Failed to create GLFW window" << std::endl;
+    glfwTerminate();
+    return -1;
+  }
+  
+  glfwMakeContextCurrent(window);
+  glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
   init();
-  glutDisplayFunc(display); 
-  glutReshapeFunc(reshape);
   
-  glutMainLoop();
+  // Main loop
+  while (!glfwWindowShouldClose(window)) {
+    glfwPollEvents();
+    glClear(GL_COLOR_BUFFER_BIT);
+    display();
+  }
+  
+  glfwTerminate();
   return 0;
 }
