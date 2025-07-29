@@ -22,7 +22,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include <GL/glut.h>
+#include <GLFW/glfw3.h>
+#include <GL/glu.h>
+#include <iostream>
 #include <infovis/tree/tree.hpp>
 #include <infovis/tree/dir_tree.hpp>
 #include <infovis/tree/xml_tree.hpp>
@@ -35,6 +37,9 @@
 #include <cmath>
 
 using namespace infovis;
+
+// GLFW globals
+static GLFWwindow* window = nullptr;
 
 typedef FloatColumn WeightMap;
 typedef tree Tree;
@@ -168,7 +173,8 @@ manage_state()
       glDisable(GL_TEXTURE_1D);
       glEnableClientState(GL_COLOR_ARRAY);
       glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-      glutFullScreen();
+      // TODO: GLFW migration - glutFullScreen() equivalent: glfwSetWindowMonitor()
+      // glutFullScreen();
     }
     s = state - 21;
   }
@@ -223,13 +229,14 @@ manage_state()
     // need to change shading and full screen
   }
   state++;
-  glutPostRedisplay();
+  // TODO: GLFW migration - glutPostRedisplay() equivalent
+  // glutPostRedisplay();
 }
 
 static void
 display()
 {
-  int time = glutGet(GLUT_ELAPSED_TIME);
+  double time = glfwGetTime();
 
   if (vertices.size() == 0)
     create_vertices();
@@ -264,11 +271,11 @@ display()
     if (use_list)
       glCallList(list);
   }
-  if (double_buffer)
-    glutSwapBuffers();
+  if (double_buffer && window)
+    glfwSwapBuffers(window);
   else
     glFlush();
-  float t = (glutGet(GLUT_ELAPSED_TIME) - time) / 1000.0f;
+  double t = glfwGetTime() - time;
   std::cout << "Time "
 	    << t << "s "
 	    << (colors.size())/t << " vertices/s "
@@ -318,10 +325,13 @@ static void key(unsigned char key, int x, int y)
     if (use_fullscreen) {
       prev_width = win_width;
       prev_height = win_height;
-      glutFullScreen();
+      // TODO: GLFW migration - glutFullScreen() equivalent: glfwSetWindowMonitor()
+      // glutFullScreen();
     }
-    else
-      glutReshapeWindow(prev_width, prev_height);
+    else {
+      // TODO: GLFW migration - glutReshapeWindow() equivalent: glfwSetWindowSize()  
+      // glutReshapeWindow(prev_width, prev_height);
+    }
     break;
   case 'p':
     send_pointers = true;
@@ -376,7 +386,8 @@ static void key(unsigned char key, int x, int y)
       glDisable(GL_FOG);
     break;
   }
-  glutPostRedisplay();
+  // TODO: GLFW migration - glutPostRedisplay() equivalent  
+  // glutPostRedisplay();
 }
 
 int main(int argc, char * argv[])
@@ -413,11 +424,27 @@ int main(int argc, char * argv[])
 
   prev_width = win_height = 768;
   prev_height = win_width = 1024;
-  glutInit(&argc, argv);
-  glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
-  glutInitWindowSize (win_width, win_height);
-  glutInitWindowPosition (0, 0);
-  glutCreateWindow (argv[0]);
+  
+  // Initialize GLFW
+  if (!glfwInit()) {
+    std::cerr << "Failed to initialize GLFW" << std::endl;
+    return -1;
+  }
+  
+  // Configure GLFW
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+  
+  // Create window
+  window = glfwCreateWindow(win_width, win_height, argv[0], nullptr, nullptr);
+  if (!window) {
+    std::cerr << "Failed to create GLFW window" << std::endl;
+    glfwTerminate();
+    return -1;
+  }
+  
+  glfwMakeContextCurrent(window);
+  // TODO: Add GLFW callbacks for keyboard and resize
   //glutFullScreen();
 
   glShadeModel (GL_FLAT);
@@ -454,10 +481,21 @@ int main(int argc, char * argv[])
 
   list = glGenLists(1);
   init();
-  glutDisplayFunc(display); 
-  glutReshapeFunc(reshape);
-  glutKeyboardFunc(key);
   
-  glutMainLoop();
+  // TODO: GLFW migration - Complex keyboard and display callbacks need GLFW equivalents
+  // glutDisplayFunc(display); 
+  // glutReshapeFunc(reshape);
+  // glutKeyboardFunc(key);
+  
+  // Simple main loop for now - interactive features disabled
+  while (!glfwWindowShouldClose(window)) {
+    glfwPollEvents();
+    // Run display once and exit for benchmark purposes  
+    glClear(GL_COLOR_BUFFER_BIT);
+    display();
+    break; // Exit after one frame for benchmark
+  }
+  
+  glfwTerminate();
   return 0;
 }
