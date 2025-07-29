@@ -575,8 +575,31 @@ LiteWindow::run()
 void
 LiteWindow::processTimers()
 {
-  // Timer functionality disabled for now
-  return;
+  if (timers_.empty()) return;
+  
+  double current_time = glfwGetTime();
+  
+  // Check for expired timers and collect them to avoid iterator invalidation
+  std::vector<TimerHandler*> expired_handlers;
+  
+  for (auto it = timers_.begin(); it != timers_.end(); ) {
+    if (current_time >= it->next_trigger) {
+      // Timer expired, collect handler
+      if (it->handler) {
+        expired_handlers.push_back(it->handler);
+      }
+      
+      // Remove this timer (one-shot timers in GLUT style)
+      it = timers_.erase(it);
+    } else {
+      ++it;
+    }
+  }
+  
+  // Fire all expired timers
+  for (TimerHandler* handler : expired_handlers) {
+    handler->timer();
+  }
 }
 
 void
@@ -872,9 +895,17 @@ LiteWindow::fireKeyboardHandler(int key, bool down) const
 void
 LiteWindow::addTimerHandler(unsigned long millis, TimerHandler * h)
 {
-  // For now, disable timer functionality to avoid crashes
-  // Timer functionality can be re-enabled when needed
-  return;
+  if (!h) return;
+  
+  // Store timer info - we'll check these in the main loop
+  Timer timer_info;
+  timer_info.handler = h;
+  timer_info.interval_ms = millis;
+  timer_info.next_trigger = glfwGetTime() + (millis / 1000.0);
+  timer_info.index = timer_handler_.size();
+  
+  timers_.push_back(timer_info);
+  timer_handler_.push_back(h);
 }
 
 static TimerHandler waiting_timer_handler;

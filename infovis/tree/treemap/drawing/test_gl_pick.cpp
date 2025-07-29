@@ -177,13 +177,8 @@ static void display()
     gl::color(0.0, 0.0, 0.0);
     gl::raster_pos(5, 5);
     const std::string& name = names[labeled_node];
-    // TODO: Replace GLUT bitmap character rendering with GLFW-compatible text rendering
-    // For now, the picking functionality works without text rendering
-    /*
-    for (char c : name) {
-      glutBitmapCharacter(GLUT_BITMAP_9_BY_15, c);
-    }
-    */
+    // Note: Text rendering functionality removed during GLFW migration
+    // Originally displayed node name using GLUT bitmap fonts
   }
   
   glFlush();

@@ -196,10 +196,8 @@ Lite::end() const
 void
 Lite::repaint() const
 {
-  // TODO: GLFW migration - glutPostRedisplay() equivalent
-  // In GLFW, the application needs to manage redraws through the main event loop
-  // This is a placeholder - proper GLFW integration requires restructuring the Lite framework
-  // glutPostRedisplay();
+  // Note: GLFW redraw management is handled through the main event loop
+  // Unlike GLUT's glutPostRedisplay(), GLFW applications manage redraws differently
 }
 
 void

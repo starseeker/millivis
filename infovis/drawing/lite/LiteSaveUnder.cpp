@@ -87,17 +87,14 @@ LiteSaveUnder::refresh()
       drawBuffer == GL_BACK_LEFT ||
       drawBuffer == GL_BACK_RIGHT) {
     glDrawBuffer(GL_FRONT);
-    // TODO: GLFW migration - glutSetCursor(GLUT_CURSOR_NONE) equivalent
-    // In GLFW, cursor management requires a window handle: glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN)
-    // glutSetCursor(GLUT_CURSOR_NONE);
+    // Note: Cursor management during save operations is not implemented in GLFW version
+    // Originally hid cursor during glCopyPixels operation
     glRasterPos2d(xmin(saved), ymin(saved));
     glCopyPixels(xmin(saved), ymin(saved),
 		 width(saved), height(saved),
 		 GL_COLOR);
     glDrawBuffer(GL_BACK);
-    // TODO: GLFW migration - glutSetCursor(GLUT_CURSOR_INHERIT) equivalent  
-    // In GLFW: glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL)
-    // glutSetCursor(GLUT_CURSOR_INHERIT);
+    // Note: Cursor management during save operations is not implemented in GLFW version
   }
   glFlush();
 }
