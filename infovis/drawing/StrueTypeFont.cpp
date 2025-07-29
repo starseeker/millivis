@@ -41,8 +41,17 @@ StrueTypeFont::StrueTypeFont(const string& name, Style style, float size)
 {
   ensureInitialized();
   
-  // Load default font or try to load specified font
-  strue_font_ = strue_load_font_from_file(nullptr); // Use default embedded font
+  // Load ProFont as default font, or try to load specified font
+  if (name == "default" || name.empty()) {
+    // Use embedded ProFont as default
+    strue_font_ = strue_load_font_from_file("infovis/drawing/fonts/ProFont.ttf");
+    if (!strue_font_) {
+      // Fallback to built-in font if ProFont not found
+      strue_font_ = strue_load_font_from_file(nullptr);
+    }
+  } else {
+    strue_font_ = strue_load_font_from_file(name.c_str());
+  }
   
   if (strue_font_ && fons_context_) {
     // Add font to fontstash context

@@ -1,6 +1,6 @@
 /* -*- C++ -*-
  *
- * Font installation for StrueTypeFont
+ * Font installation for StrueTypeFont in drawing library
  */
 #include "StrueTypeFont.hpp"
 
