@@ -34,9 +34,9 @@ find_package(ZLIB REQUIRED)
 find_package(Freetype REQUIRED)
 find_package(EXPAT REQUIRED)
 
-# Assuming OpenGL and GLUT are present for now
+# Assuming OpenGL and GLFW are present for now
 find_package(OpenGL REQUIRED)
-find_package(GLUT REQUIRED)
+find_package(glfw3 REQUIRED)
 
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}
@@ -45,7 +45,6 @@ include_directories(
     ${Freetype_INCLUDE_DIRS}
     ${EXPAT_INCLUDE_DIRS}
     ${OPENGL_INCLUDE_DIR}
-    ${GLUT_INCLUDE_DIR}
     # Add others as needed
 )
 
@@ -56,7 +55,7 @@ set(MILLIONVIS_LIBS
     ${Freetype_LIBRARIES}
     ${EXPAT_LIBRARIES}
     ${OPENGL_LIBRARIES}
-    ${GLUT_LIBRARIES}
+    glfw
     # Add others as needed
     CACHE INTERNAL "MillionVis external libraries"
 )

@@ -22,8 +22,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include <GL/glut.h>
-//#include <GL/glu.h>
+#include <GLFW/glfw3.h>
+#include <GL/glu.h>
 #include <infovis/tree/vector_as_tree.hpp>
 #include <infovis/tree/treemap/slice_and_dice.hpp>
 #include <infovis/tree/treemap/squarified.hpp>

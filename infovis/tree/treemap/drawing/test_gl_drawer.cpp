@@ -22,8 +22,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include <GL/glut.h>
-//#include <GL/glu.h>
+#include <GLFW/glfw3.h>
+#include <GL/glu.h>
 #ifdef VECTOR_AS_TREE
 #include <infovis/tree/vector_as_tree.hpp>
 #include <infovis/tree/dir_property_tree.hpp>
@@ -70,7 +70,22 @@ struct compare_weight {
   }
 };
 
+// GLFW globals
+static GLFWwindow* window = nullptr;
+
 typedef debug_drawer<Tree, Box, gl_drawer<Tree,Box> > Drawer;
+
+// GLFW callback functions
+static void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+  win_width = width;
+  win_height = height;
+  glViewport(0, 0, width, height);
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  gluOrtho2D(0, width, 0, height);
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+}
 
 static void display()
 {
@@ -89,6 +104,9 @@ static void display()
   tmsq.finish();
 #endif
   glFlush();
+  if (window) {
+    glfwSwapBuffers(window);
+  }
 }
 
 static void init()
@@ -153,11 +171,27 @@ int main(int argc, char * argv[])
 
   win_height = 768;
   win_width = 1024;
-  glutInit(&argc, argv);
-  glutInitDisplayMode(GLUT_RGB);
-  glutInitWindowSize (win_width, win_height); 
-  glutInitWindowPosition (0, 0);
-  glutCreateWindow (argv[0]);
+  
+  // Initialize GLFW
+  if (!glfwInit()) {
+    std::cerr << "Failed to initialize GLFW" << std::endl;
+    return -1;
+  }
+  
+  // Configure GLFW
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+  
+  // Create window
+  window = glfwCreateWindow(win_width, win_height, argv[0], nullptr, nullptr);
+  if (!window) {
+    std::cerr << "Failed to create GLFW window" << std::endl;
+    glfwTerminate();
+    return -1;
+  }
+  
+  glfwMakeContextCurrent(window);
+  glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
   glClearColor (1, 1, 0, 1);
   glShadeModel (GL_FLAT);
@@ -169,9 +203,13 @@ int main(int argc, char * argv[])
   glLoadIdentity();
 
   init();
-  glutDisplayFunc(display); 
-  glutReshapeFunc(reshape);
   
-  glutMainLoop();
+  // Main loop
+  while (!glfwWindowShouldClose(window)) {
+    glfwPollEvents();
+    display();
+  }
+  
+  glfwTerminate();
   return 0;
 }
