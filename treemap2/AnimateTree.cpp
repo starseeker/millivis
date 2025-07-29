@@ -61,7 +61,7 @@ is_null_box(const Box& b)
 void
 AnimateTree::render(float param)
 {
-  if (texture_ != nullptr) {
+  if (texture_ != 0) {
     AnimateBoxList::render(param);
     return;
   }

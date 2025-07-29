@@ -14,18 +14,18 @@ add_executable(test_lite_drawer test_lite_drawer.cpp)
 target_link_libraries(test_lite_drawer PRIVATE 
     liblite liblite_lite liblite_inter liblite_notifiers liblite_colors 
     libtree libtable
-    png z freetype expat GL GLU glut)
+    ${MILLIONVIS_LIBS})
 
 add_executable(test_lite_drawer2 test_lite_drawer2.cpp)  
 target_link_libraries(test_lite_drawer2 PRIVATE 
     liblite liblite_lite liblite_inter liblite_notifiers liblite_colors 
     libtree libtable
-    png z freetype expat GL GLU glut)
+    ${MILLIONVIS_LIBS})
 
 add_executable(test_lite_drawer3 test_lite_drawer3.cpp)
 target_link_libraries(test_lite_drawer3 PRIVATE 
     liblite liblite_lite liblite_inter liblite_notifiers liblite_colors 
     libtree libtable
-    png z freetype expat GL GLU glut)
+    ${MILLIONVIS_LIBS})
 
 # add_executable(test_3d_drawer test_3d_drawer.cpp)

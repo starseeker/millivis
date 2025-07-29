@@ -6,6 +6,7 @@ set(TABLE_SOURCES
 )
 
 add_library(libtable STATIC ${TABLE_SOURCES})
+target_link_libraries(libtable PRIVATE ${MILLIONVIS_LIBS})
 
 add_executable(test_column test_column.cpp)
 target_link_libraries(test_column PRIVATE libtable)
