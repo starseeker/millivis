@@ -33,7 +33,6 @@ add_subdirectory(focusimage)
 # Find system libraries (rough translation of Jamrules logic)
 find_package(PNG REQUIRED)
 find_package(ZLIB REQUIRED)
-find_package(Freetype REQUIRED)
 find_package(EXPAT REQUIRED)
 
 # Assuming OpenGL and GLUT are present for now
@@ -44,7 +43,6 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${PNG_INCLUDE_DIRS}
     ${ZLIB_INCLUDE_DIRS}
-    ${Freetype_INCLUDE_DIRS}
     ${EXPAT_INCLUDE_DIRS}
     ${OPENGL_INCLUDE_DIR}
     ${GLUT_INCLUDE_DIR}
@@ -55,7 +53,6 @@ include_directories(
 set(MILLIONVIS_LIBS
     ${PNG_LIBRARIES}
     ${ZLIB_LIBRARIES}
-    ${Freetype_LIBRARIES}
     ${EXPAT_LIBRARIES}
     ${OPENGL_LIBRARIES}
     ${GLUT_LIBRARIES}
