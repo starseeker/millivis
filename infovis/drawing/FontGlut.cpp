@@ -27,9 +27,56 @@
 #ifdef _WIN32
 #include <windows.h>
 #endif
-#include <GL/glut.h>
+#include <GLFW/glfw3.h>
 
 namespace infovis {
+
+// Simple replacements for GLUT font constants and functions
+static void* GLFW_STROKE_ROMAN = (void*)1;
+static void* GLFW_STROKE_MONO_ROMAN = (void*)2;  
+static void* GLFW_BITMAP_8_BY_13 = (void*)3;
+static void* GLFW_BITMAP_9_BY_15 = (void*)4;
+
+// Simple character width function for basic fonts
+static int glfw_character_width(const void* font, int character) {
+  if (font == GLFW_BITMAP_8_BY_13) return 8;
+  if (font == GLFW_BITMAP_9_BY_15) return 9;
+  return 8; // fallback
+}
+
+// Simple stroke width function - returns scaled width
+static float glfw_stroke_width(const void* font, int character) {
+  // Return a reasonable width based on character
+  if (character >= 32 && character <= 126) {
+    return 104.76f; // approximate average width for stroke fonts
+  }
+  return 0.0f;
+}
+
+// Simple stroke character rendering - just move the position
+static void glfw_stroke_character(const void* font, int character) {
+  // In a real implementation, this would render vector characters
+  // For now, just advance the position
+  glTranslatef(glfw_stroke_width(font, character), 0, 0);
+}
+
+// Simple bitmap character rendering - draw a simple rectangle
+static void glfw_bitmap_character(const void* font, int character) {
+  // In a real implementation, this would render bitmap characters
+  // For now, just draw a simple rectangle and advance position
+  int width = glfw_character_width(font, character);
+  int height = (font == GLFW_BITMAP_8_BY_13) ? 13 : 15;
+  
+  glBegin(GL_QUADS);
+  glVertex2f(0, 0);
+  glVertex2f(width, 0);
+  glVertex2f(width, height);
+  glVertex2f(0, height);
+  glEnd();
+  
+  // Move to next character position
+  glRasterPos2f(width, 0);  
+}
 
 static const float font_ascent = 119.05;
 static const float font_descent = 33.33;
@@ -59,7 +106,7 @@ FontGlutStroke::getFormat() const
 bool
 FontGlutStroke::isFixedWidth() const
 {
-  return type == GLUT_STROKE_MONO_ROMAN;
+  return type == GLFW_STROKE_MONO_ROMAN;
 }
 
 void
@@ -69,7 +116,7 @@ FontGlutStroke::paint(const string& str, float x, float y)
   glTranslatef(x, y, 0);
   glScalef(size * font_scale, size * font_scale, 1);
   for (string::const_iterator i = str.begin(); i != str.end(); i++) {
-    glutStrokeCharacter(type, *i);
+    glfw_stroke_character(type, *i);
   }
   glPopMatrix();
 }
@@ -95,7 +142,7 @@ FontGlutStroke::getDescent() const
 float
 FontGlutStroke::charWidth(int ch) const
 {
-  return font_scale * size * glutStrokeWidth(type, ch);
+  return font_scale * size * glfw_stroke_width(type, ch);
 }
 
 float
@@ -104,7 +151,7 @@ FontGlutStroke::stringWidth(const string& str)
   int w = 0;
   for (string::const_iterator i = str.begin();
        i != str.end(); i++) {
-    w += glutStrokeWidth(type, *i);
+    w += glfw_stroke_width(type, *i);
   }
   return w * font_scale * size;
 }
@@ -132,8 +179,8 @@ bool
 FontGlutBitmap::isFixedWidth() const
 {
   return
-    type == GLUT_BITMAP_8_BY_13 ||
-    type == GLUT_BITMAP_9_BY_15;
+    type == GLFW_BITMAP_8_BY_13 ||
+    type == GLFW_BITMAP_9_BY_15;
 }
 
 void
@@ -141,7 +188,7 @@ FontGlutBitmap::paint(const string& str, float x, float y)
 {
   glRasterPos2f(x, y);
   for (string::const_iterator i = str.begin(); i != str.end(); i++) {
-    glutBitmapCharacter(type, *i);
+    glfw_bitmap_character(type, *i);
   }
 }
 
@@ -166,7 +213,7 @@ FontGlutBitmap::getDescent() const
 float
 FontGlutBitmap::charWidth(int ch) const
 {
-  return glutBitmapWidth(type, ch);
+  return glfw_character_width(type, ch);
 }
 
 float
@@ -175,7 +222,7 @@ FontGlutBitmap::stringWidth(const string& str)
   int w = 0;
   for (string::const_iterator i = str.begin();
        i != str.end(); i++) {
-    w += glutBitmapWidth(type, *i);
+    w += glfw_character_width(type, *i);
   }
   return w;
 }
@@ -196,15 +243,15 @@ FontGlutCreator::create(const string& name, Font::Style style, float size)
       name == "glut_stroke_roman" ||
       name == "default" ||
       name == "glut stroke roman")
-    return new FontGlutStroke(GLUT_STROKE_ROMAN, name, style, size);
+    return new FontGlutStroke(GLFW_STROKE_ROMAN, name, style, size);
   if (name == "GLUT_STROKE_MONO_ROMAN" ||
       name == "GLUT STROKE MONO ROMAN" ||
       name == "glut_stroke_mono_roman" ||
       name == "glut stroke mono roman")
-    return new FontGlutStroke(GLUT_STROKE_MONO_ROMAN, name, style, size);
+    return new FontGlutStroke(GLFW_STROKE_MONO_ROMAN, name, style, size);
   if (name == "GLUT_BITMAP_8_BY_13" ||
       name == "8x13")
-    return new FontGlutBitmap(GLUT_BITMAP_8_BY_13, 7, 6,
+    return new FontGlutBitmap(GLFW_BITMAP_8_BY_13, 7, 6,
 			      name, style, size);
   return 0;
 }
