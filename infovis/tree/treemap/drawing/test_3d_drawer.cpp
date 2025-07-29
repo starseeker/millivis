@@ -22,16 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include <GL/glut.h>
-//#include <GL/glu.h>
+#include <GLFW/glfw3.h>
+#include <GL/glu.h>
 #include <infovis/drawing/drawing.hpp>
 #include <infovis/tree/dir_property_tree.hpp>
 #include <infovis/tree/xml_property_tree.hpp>
 #include <infovis/tree/vector_as_tree.hpp>
 #include <infovis/tree/treemap/slice_and_dice.hpp>
 #include <infovis/tree/treemap/squarified.hpp>
-#include <infovis/tree/treemap/drawing/gl_cs_3d_drawer.hpp>
 #include <infovis/tree/treemap/drawing/debug_drawer.hpp>
+#include <infovis/tree/treemap/drawing/border_drawer.hpp>
+#include <infovis/tree/treemap/drawing/color_drawer.hpp>
+#include <infovis/drawing/gl_support.hpp>
 #include <cmath>
 #include <iostream>
 
@@ -44,6 +46,9 @@
 #include <infovis/drawing/box_io.hpp>
 #endif
 using namespace infovis;
+
+// GLFW window handle
+static GLFWwindow* window = nullptr;
 
 typedef std::vector<float,gc_alloc<float,true> > WeightMap;
 typedef property_tree Tree;
@@ -216,12 +221,12 @@ static void display()
     WeightMap& swm = t.get_prop_numeric(sum_weight_prop);
 
 #if 0
-    treemap_slice_and_dice<Tree,Box,WeightMap&, WeightMap&,Drawer& >
-      tmsd(t, wm, swm,drawer);
+    treemap_slice_and_dice<Tree,Box,WeightMap&,Drawer& >
+      tmsd(t, swm, drawer);
     tmsd.visit(left_to_right, Box(0, 0, win_width, win_height), root(t));
 #else
-    treemap_squarified<Tree,Box,WeightMap&, WeightMap&,Drawer& >
-      tmsq(t, wm, swm,drawer);
+    treemap_squarified<Tree,Box,WeightMap&,Drawer& >
+      tmsq(t, swm, drawer);
     tmsq.visit(Box(0, 0, win_width, win_height), root(t));
 #endif
     drawer.finish();
@@ -229,35 +234,44 @@ static void display()
     //use_list = true;
   }
   glPopMatrix();
-  glutSwapBuffers();
+  if (window) {
+    glfwSwapBuffers(window);
+  }
 #endif
 }
 
-/* ARGSUSED2 */
+/* GLFW mouse button callback */
 static void
-mouse(int button, int state, int x, int y)
+mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
-  if (button == GLUT_LEFT_BUTTON) {
-    if (state == GLUT_DOWN) {
+  double xpos, ypos;
+  glfwGetCursorPos(window, &xpos, &ypos);
+  int x = static_cast<int>(xpos);
+  int y = static_cast<int>(ypos);
+  
+  if (button == GLFW_MOUSE_BUTTON_LEFT) {
+    if (action == GLFW_PRESS) {
       moving = 1;
       startx = x;
       starty = y;
     }
-    if (state == GLUT_UP) {
+    if (action == GLFW_RELEASE) {
       moving = 0;
     }
   }
-  else if (button == GLUT_RIGHT_BUTTON) {
-    if (state == GLUT_DOWN) {
+  else if (button == GLFW_MOUSE_BUTTON_RIGHT) {
+    if (action == GLFW_PRESS) {
       depth_factor = float(win_height - y) / win_height;
     }
-    glutPostRedisplay();
   }
 }
 
 static void
-motion(int x, int y)
+cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
 {
+  int x = static_cast<int>(xpos);
+  int y = static_cast<int>(ypos);
+  
   if (moving) {
     glTranslatef(win_width/2, win_height/2, 0);
     glRotatef((x - startx), 0.0, 1.0, 0.0);
@@ -269,7 +283,6 @@ motion(int x, int y)
   else {
     depth_factor = float(win_height - y) / win_height;
   }    
-  glutPostRedisplay();
 }
 
 static void init()
@@ -292,39 +305,41 @@ static void init()
 }
 
 static void
-special(int key, int x, int y)
+key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
+  if (action != GLFW_PRESS && action != GLFW_REPEAT)
+    return;
+    
   switch(key) {
-  case GLUT_KEY_PAGE_UP:
+  case GLFW_KEY_PAGE_UP:
     glTranslatef(0, 0, DEPTH_INCR);
     break;
-  case GLUT_KEY_PAGE_DOWN:
+  case GLFW_KEY_PAGE_DOWN:
     glTranslatef(0, 0, -DEPTH_INCR);
     break;
-  case GLUT_KEY_HOME:
+  case GLFW_KEY_HOME:
     init();
     glLoadIdentity();
     glTranslatef(-win_width/2, -win_height/2, -win_width);  
     break;
-  case GLUT_KEY_UP:
+  case GLFW_KEY_UP:
     glTranslatef(0, DEPTH_INCR, 0);
     break;
-  case GLUT_KEY_DOWN:
+  case GLFW_KEY_DOWN:
     glTranslatef(0, -DEPTH_INCR, 0);
     break;
-  case GLUT_KEY_LEFT:
+  case GLFW_KEY_LEFT:
     glTranslatef(DEPTH_INCR, 0, 0);
     break;
-  case GLUT_KEY_RIGHT:
+  case GLFW_KEY_RIGHT:
     glTranslatef(-DEPTH_INCR, 0, 0);
     break;
   default:
     return;
   }
-  glutPostRedisplay();
 }
 
-static void reshape(int w, int h)
+static void framebuffer_size_callback(GLFWwindow* window, int w, int h)
 {
   win_width = w;
   win_height = h;
@@ -342,9 +357,10 @@ WeightMap& create_sum_weight(Tree& tree, const string& prop)
 {
   Tree::prop_id sum_weight = tree.add_property(prop+"_sum", Tree::type_numeric);
   WeightMap& swm = tree.get_prop_numeric(sum_weight);
-  sum_weights(tree,
-	      tree.get_prop_numeric(prop),
-	      swm);
+  // Copy the original weights to the sum weight map
+  WeightMap& orig_wm = tree.get_prop_numeric(tree.get_prop_id(prop));
+  swm = orig_wm;
+  sum_weights(tree, swm);
   return swm;
 }
 
@@ -388,12 +404,34 @@ int main(int argc, char * argv[])
 
   win_height = 600;
   win_width = 800;
-  glutInit(&argc, argv);
-  glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
-  glutInitWindowSize (win_width, win_height); 
-  glutInitWindowPosition (0, 0);
-  glutCreateWindow ("test 3d");
-  //glutFullScreen();
+  
+  // Initialize GLFW
+  if (!glfwInit()) {
+    std::cerr << "Failed to initialize GLFW" << std::endl;
+    return -1;
+  }
+  
+  // Configure GLFW
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+  glfwWindowHint(GLFW_SAMPLES, 4); // 4x antialiasing
+  glfwWindowHint(GLFW_DEPTH_BITS, 24);
+  
+  // Create window
+  window = glfwCreateWindow(win_width, win_height, "test 3d", nullptr, nullptr);
+  if (!window) {
+    std::cerr << "Failed to create GLFW window" << std::endl;
+    glfwTerminate();
+    return -1;
+  }
+  
+  glfwMakeContextCurrent(window);
+  
+  // Set up callbacks
+  glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+  glfwSetMouseButtonCallback(window, mouse_button_callback);
+  glfwSetCursorPosCallback(window, cursor_position_callback);
+  glfwSetKeyCallback(window, key_callback);
 
   glShadeModel (GL_SMOOTH);
   glClearColor (0.0, 0.0, 0.0, 1);
@@ -410,14 +448,15 @@ int main(int argc, char * argv[])
   glClearDepth(3000);
 
   init();
-  glutDisplayFunc(display); 
-  glutReshapeFunc(reshape);
-  glutMouseFunc(mouse);
-  glutMotionFunc(motion);
-  glutSpecialFunc(special);
   glEnableClientState(GL_COLOR_ARRAY);
   glEnableClientState(GL_VERTEX_ARRAY);
   
-  glutMainLoop();
+  // Main loop
+  while (!glfwWindowShouldClose(window)) {
+    glfwPollEvents();
+    display();
+  }
+  
+  glfwTerminate();
   return 0;
 }

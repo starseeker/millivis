@@ -33,7 +33,7 @@
 * that can visualize around one million items with a decent
 * interaction speed.  It relies on the OpenGL graphics library for
 * rendering, as well as several external libraries:
-* - glut on top of OpenGL for ease of use
+* - GLFW on top of OpenGL for window management and input handling
 * - freetype for font rendering
 * - the Boehm-Weiser garbage collector for C and C++ to simplify the
 *   programming

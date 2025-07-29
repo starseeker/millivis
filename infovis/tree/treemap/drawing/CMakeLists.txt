@@ -32,3 +32,7 @@ target_link_libraries(test_lite_drawer3 PRIVATE
     ${MILLIONVIS_LIBS})
 
 # add_executable(test_3d_drawer test_3d_drawer.cpp)
+
+add_executable(test_3d_drawer test_3d_drawer.cpp)
+target_link_libraries(test_3d_drawer PRIVATE liblite libtree libtable
+    png z freetype expat GL GLU glfw)
