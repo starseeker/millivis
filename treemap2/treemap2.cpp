@@ -111,25 +111,29 @@ public:
       treemap_(0),
       inter_(0),
       inter_lite_(0),
-      label_font_(props->get_font("label.font", 
-				  Font::create("Arial", "plain", 12))),
-      monitor_font_(props->get_font("monitor.label.font",
-				    Font::create("Arial", "plain", 12))),
+      label_font_(nullptr),
+      monitor_font_(nullptr),
       controls_(0),
       param_(0.0f, 1.0f, 0.0f),
       transparency_(0, 100, 0),
       plot_range_(1, 30, 1, 14),
       color_range_(0.0f, 7.0f, 0.0f, 7.0f),
-      speed_(0,
-	     Box(xmin(bounds), ymax(bounds)-monitor_font_->getHeight(),
-		 xmax(bounds), ymax(bounds)),
-	     monitor_font_),
+      speed_(nullptr, Box(0, 0, 100, 12), nullptr),
       dryrun_(false)
   {
+    // Initialize fonts after OpenGL context is ready
+    label_font_ = props->get_font("label.font", 
+                                  Font::create("Arial", "plain", 12));
+    monitor_font_ = props->get_font("monitor.label.font",
+                                    Font::create("Arial", "plain", 12));
+    
+    // Fallback to safe height if font creation failed
+    int font_height = monitor_font_ ? monitor_font_->getHeight() : 12;
+    
     treemap_ = new LiteTreemap(Box(xmin(bounds),
 				   ymin(bounds),
 				   xmax(bounds),
-				   ymax(bounds)-monitor_font_->getHeight()),
+				   ymax(bounds)-font_height),
 			       save_under_,
 			       drawer_,
 			       label_font_,
@@ -162,6 +166,11 @@ public:
     addChild(controls_);
     controls_->setVisible(false);
 
+    // Update speed_ with proper bounds and font
+    speed_ = LiteSpeed(treemap_, 
+                       Box(xmin(bounds), ymax(bounds) - font_height,
+                           xmax(bounds), ymax(bounds)),
+                       monitor_font_);
     //speed_.setPosition(Point(0, monitor_font_->getDescent()));
     speed_.setTreemap(treemap_);
     addChild(&speed_);
@@ -228,13 +237,15 @@ public:
   }
   void doReshape(int w, int h) {
     Box bounds(getBounds());
+    int font_height = monitor_font_ ? monitor_font_->getHeight() : 12;
+    
     treemap_->enableSaveUnder();
     treemap_->setBounds(Box(xmin(bounds),
 			    ymin(bounds),
 			    xmax(bounds),
-			    ymax(bounds)-monitor_font_->getHeight()));
+			    ymax(bounds)-font_height));
     speed_.setBounds(Box(xmin(bounds),
-			 ymax(bounds)-monitor_font_->getHeight(),
+			 ymax(bounds)-font_height,
 			 xmax(bounds),
 			 ymax(bounds)));
     controls_->border_slider_->setMaxBounds(treemap_->getBounds());

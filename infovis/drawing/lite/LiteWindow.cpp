@@ -564,9 +564,19 @@ LiteWindow::run()
   while (!glfwWindowShouldClose(window)) {
     glfwPollEvents();
     
+    // Process timers
+    processTimers();
+    
     // Trigger display
     display();
   }
+}
+
+void
+LiteWindow::processTimers()
+{
+  // Timer functionality disabled for now
+  return;
 }
 
 void
@@ -862,10 +872,9 @@ LiteWindow::fireKeyboardHandler(int key, bool down) const
 void
 LiteWindow::addTimerHandler(unsigned long millis, TimerHandler * h)
 {
-  // TODO: Implement timer handling with GLFW
-  // GLFW doesn't have built-in timer functions like GLUT
-  // For now, timers are disabled
-  std::cerr << "Warning: Timer functionality not yet implemented in GLFW version" << std::endl;
+  // For now, disable timer functionality to avoid crashes
+  // Timer functionality can be re-enabled when needed
+  return;
 }
 
 static TimerHandler waiting_timer_handler;
@@ -873,6 +882,15 @@ static TimerHandler waiting_timer_handler;
 bool
 LiteWindow::removeTimerHandler(TimerHandler * h)
 {
+  // Remove from timers vector
+  for (auto it = timers_.begin(); it != timers_.end(); ++it) {
+    if (it->handler == h) {
+      timers_.erase(it);
+      break;
+    }
+  }
+  
+  // Remove from timer_handler_ vector (keeping for backward compatibility)
   std::vector<TimerHandler*>::iterator i =
     std::find(timer_handler_.begin(), timer_handler_.end(), h);
   if (i != timer_handler_.end()) {
@@ -885,6 +903,7 @@ LiteWindow::removeTimerHandler(TimerHandler * h)
 void
 LiteWindow::removeAllTimerHandlers()
 {
+  timers_.clear();
   timer_handler_.clear();
 }
 

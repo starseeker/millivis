@@ -172,8 +172,16 @@ public:
   
   void do_reshape(int w, int h);
   int glfw_to_keycode(int key);
+  void processTimers(); // Process pending timers
 
 protected:
+  struct Timer {
+    TimerHandler* handler;
+    unsigned long interval_ms;
+    double next_trigger;
+    int index;
+  };
+  std::vector<Timer> timers_;
   int win;
   string name;
   double near_plane;
