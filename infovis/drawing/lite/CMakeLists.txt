@@ -44,12 +44,11 @@ set(LITE_SOURCES
 add_library(liblite_lite STATIC ${LITE_SOURCES})
 target_link_libraries(liblite_lite PRIVATE liblite liblite_notifiers png z freetype expat GL GLU glut)
 
-# TODO: Skip test targets for now - requires Boost tree traits that need modernization
-#add_executable(test_lite_as_tree test_lite_as_tree.cpp)
-#add_executable(test_lite_box test_lite_box.cpp)
-#target_link_libraries(test_lite_box PRIVATE liblite libtree ${MILLIONVIS_LIBS})
+add_executable(test_lite_as_tree test_lite_as_tree.cpp)
+add_executable(test_lite_box test_lite_box.cpp)
+target_link_libraries(test_lite_box PRIVATE liblite libtree ${MILLIONVIS_LIBS})
 
-#add_executable(test_lite_slider test_lite_slider.cpp)
-#target_link_libraries(test_lite_slider PRIVATE liblite libtree ${MILLIONVIS_LIBS})
-# add_executable(test_lite_color test_lite_color.cpp)
-# target_link_libraries(test_lite_color PRIVATE liblite libtree ${MILLIONVIS_LIBS})
+add_executable(test_lite_slider test_lite_slider.cpp)
+target_link_libraries(test_lite_slider PRIVATE liblite libtree ${MILLIONVIS_LIBS})
+add_executable(test_lite_color test_lite_color.cpp)
+target_link_libraries(test_lite_color PRIVATE liblite libtree ${MILLIONVIS_LIBS})
