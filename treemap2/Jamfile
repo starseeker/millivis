@@ -23,6 +23,9 @@ SOURCES =
 	AnimateTree
 #	DynaQueries
 	LabelTreemap
+	# New font backend
+	StrueTypeFont
+	installStrueTypeFont
 	;
 
 Main treemap2 : $(SOURCES).cpp ;
