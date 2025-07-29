@@ -1,9 +1,7 @@
 set(DRAWING_SOURCES
     drawing.cpp
     Font.cpp
-    FontGlut.cpp
-    FontWin32.cpp
-    FontFT.cpp
+    installStrueTypeFontStub.cpp
     Image.cpp
     ImagePNG.cpp
     SaveUnder.cpp
@@ -18,10 +16,8 @@ set(DRAWING_SOURCES
 add_library(liblite STATIC ${DRAWING_SOURCES})
 
 # Link liblite with the required libraries and include directories
-target_link_libraries(liblite PRIVATE png z freetype expat GL GLU glut)
+target_link_libraries(liblite PRIVATE png z expat GL GLU glut)
 target_include_directories(liblite PRIVATE ${CMAKE_SOURCE_DIR})
-# TODO: Add explicit freetype2 include for C++17 modernization
-target_include_directories(liblite PRIVATE /usr/include/freetype2)
 
 # TODO: Skip test executables for now to focus on main targets - will address concept checking later
 # add_executable(test_box test_box.cpp)

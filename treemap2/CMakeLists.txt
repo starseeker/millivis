@@ -21,6 +21,11 @@ set(TREEMAP2_SOURCES
     AnimateTree.cpp
     # DynaQueries.cpp
     LabelTreemap.cpp
+    # New font backend
+    StrueTypeFont.cpp
+    installStrueTypeFont.cpp
+    font_backend/struetype.c
+    font_backend/fontstash.c
 )
 
 add_executable(treemap2 ${TREEMAP2_SOURCES})
